@@ -8,7 +8,7 @@ export const metadata: Metadata = {
   },
   description: "Advanced Medical Diagnostics",
   icons: {
-    icon: '/logo-black.png', 
+    icon: '/logo-black2.png', 
   }
 };
 

@@ -1,8 +1,13 @@
-import { login } from '../actions'
+import { login } from '../../../lib/actions/auth'
 import Link from 'next/link'
 import { AuthSidebar } from '@/components/auth/AuthSidebar'
 import { AlertCircle, CheckCircle2, UserPlus, ArrowRight } from 'lucide-react'
 import { ValidatedInput } from '@/components/ui/FormElements'
+import { Metadata } from 'next'
+
+export const metadata: Metadata = {
+  title: 'Accedi',
+}
 
 export default async function LoginPage(props: {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>
@@ -12,10 +17,11 @@ export default async function LoginPage(props: {
   const success = typeof searchParams.success === 'string' ? searchParams.success : null
 
   return (
-    <div className="min-h-screen flex bg-white font-sans text-gray-900">
+    <div className="min-h-screen flex w-full bg-white font-sans text-gray-900">
+      
       <AuthSidebar />
 
-      <div className="w-full lg:w-[55%] flex flex-col items-center justify-center p-8 relative">
+      <div className="flex-1 flex flex-col items-center justify-center p-6 relative">
         <div className="max-w-md w-full">
           <div className="mb-8">
             <h1 className="text-3xl font-bold mb-2">Accesso Console</h1>

@@ -3,13 +3,15 @@ import { AddPatientModal } from '@/components/patients/AddPatientModal'
 import { PatientList } from '@/components/patients/PatientList'
 import { Search, User, FileClock } from 'lucide-react'
 
-export const dynamic = 'force-dynamic' // Assicura che i dati siano sempre freschi
+// forza aggiornamento dei dati dal db
+export const dynamic = 'force-dynamic' 
 
 export default async function Dashboard() {
+  // connessione al db e prendo i dati del medico loggato
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   
-  // Fetch Pazienti del Dottore
+  //  prendo i dati dei pazienti del medico loggato
   const { data: patients } = await supabase
     .from('patients')
     .select('*')
@@ -17,8 +19,7 @@ export default async function Dashboard() {
     .order('created_at', { ascending: false })
 
   return (
-    <main className="max-w-6xl mx-auto p-6 space-y-8">
-      {/* Header */}
+    <main className="max-w-7xl mx-auto p-6 space-y-8 w-full">
       <div className="flex justify-between items-end">
         <div>
           <h1 className="text-2xl font-bold mb-1">Pazienti & Analisi</h1>
@@ -27,7 +28,6 @@ export default async function Dashboard() {
         <AddPatientModal />
       </div>
 
-      {/* Stats */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
           <div className="flex items-center gap-2 text-gray-500 mb-2">
@@ -45,7 +45,6 @@ export default async function Dashboard() {
         </div>
       </div>
 
-      {/* Lista Pazienti */}
       <div className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden min-h-[400px]">
         <div className="p-4 border-b border-gray-200 bg-gray-50/50 flex gap-4">
           <Search className="w-5 h-5 text-gray-400" />

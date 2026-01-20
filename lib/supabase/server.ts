@@ -8,6 +8,7 @@ export async function createClient() {
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
+      // passa i cookies al server per fargli capire chi sono, se sono loggato etc...
       cookies: {
         get(name: string) { return cookieStore.get(name)?.value },
         set(name: string, value: string, options: CookieOptions) {

@@ -1,4 +1,4 @@
-// Mappa Completa Nazione -> Codice ISO
+// costanti varie
 export const COUNTRY_MAP = [
   { name: "Afghanistan", code: "AF" },
   { name: "Albania", code: "AL" },
@@ -267,4 +267,17 @@ export const ITALIAN_PROVINCES = [
 ];
 
 export const DAYS = Array.from({ length: 31 }, (_, i) => i + 1);
-export const YEARS = Array.from({ length: 110 }, (_, i) => new Date().getFullYear() - i);
+
+// regole per i form
+export const REGEX_VALIDATORS = {
+  // solo lettere e spazi
+  NAME: "^[a-zA-Z\\s']+$",
+  // 16 caratteri alfanumerici
+  FISCAL_CODE: "^[a-zA-Z0-9]{16}$",
+  // email standard
+  EMAIL: "^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$",
+  // min 8 char, 1 maiuscola, 1 speciale, 1 numero
+  PASSWORD: "^(?=.*[A-Z])(?=.*[!@#$&*])(?=.*[0-9]).{8,}$",
+  // solo numeri e spazi
+  PHONE: "^[0-9\\s]+$"
+};

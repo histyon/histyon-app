@@ -8,7 +8,7 @@ export default function RegisterSuccessPage() {
   const router = useRouter()
 
   useEffect(() => {
-    // Redirect automatico dopo 3 secondi
+    // mostra la pagina per 3 secondi, poi ti porta alla pagina di login
     const timer = setTimeout(() => {
       router.push('/auth/login?success=Account verificato. Effettua l\'accesso.')
     }, 3000)

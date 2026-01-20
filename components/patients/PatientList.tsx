@@ -1,7 +1,8 @@
 'use client'
 import { User, ChevronRight } from 'lucide-react'
+import { Patient } from '@/types'
 
-export function PatientList({ patients }: { patients: any[] }) {
+export function PatientList({ patients }: { patients: Patient[] }) {
   return (
     <div className="divide-y divide-gray-100">
       {patients.map((p) => (

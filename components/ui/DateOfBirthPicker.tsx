@@ -1,13 +1,14 @@
 'use client'
 
-import { YEARS, MONTHS, DAYS } from '@/lib/constants'
+import { MONTHS, DAYS } from '@/lib/constants'
 
 export function DateOfBirthPicker({ name = "dob" }: { name?: string }) {
+  const currentYear = new Date().getFullYear();
+  const years = Array.from({ length: 110 }, (_, i) => currentYear - i);
   return (
     <div className="grid grid-cols-3 gap-2">
       
       <div className="relative">
-        {/* FIX: Aggiunto defaultValue="" e rimosso selected dall'option */}
         <select 
             name={`${name}_day`} 
             required 
@@ -43,7 +44,7 @@ export function DateOfBirthPicker({ name = "dob" }: { name?: string }) {
             className="w-full px-4 py-3 bg-white border border-gray-200 rounded-lg appearance-none cursor-pointer focus:border-black focus:ring-1 focus:ring-black outline-none text-gray-900"
         >
             <option value="" disabled>Anno</option>
-            {YEARS.map(y => (
+            {years.map(y => (
                 <option key={y} value={y}>{y}</option>
             ))}
         </select>

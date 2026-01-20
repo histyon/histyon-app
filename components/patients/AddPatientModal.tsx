@@ -1,12 +1,13 @@
 'use client'
 
 import { useState } from 'react'
-import { Plus, X, User, MapPin } from 'lucide-react'
+import { Plus, X, User, MapPin, AlertCircle, Phone } from 'lucide-react'
 import { useFormStatus } from 'react-dom'
 import { addPatient } from '@/lib/actions/patient'
 import { DateOfBirthPicker } from '@/components/ui/DateOfBirthPicker'
-import { ValidatedInput, GlobalLocationSelector } from '@/components/ui/FormElements'
+import { ValidatedInput, GlobalLocationSelector, PhoneInput } from '@/components/ui/FormElements'
 
+// funzione di gestione del bottone
 function SubmitButton() {
   const { pending } = useFormStatus()
   return (
@@ -16,13 +17,26 @@ function SubmitButton() {
   )
 }
 
+// modulo di aggiunta pazienti
 export function AddPatientModal() {
+  // stabilisce se è aperto o no, quindi mostrarlo o no
   const [isOpen, setIsOpen] = useState(false)
+  const [error, setError] = useState<string | null>(null)
   
+  // sul click del bottone di aggiunta richiama la funzione addPatient, se va a buon fine chiude la finestra, senno mostra errore
   async function handleSubmit(formData: FormData) {
+     setError(null) // Resetta errore precedente
      const res = await addPatient(null, formData);
-     if(res?.success) setIsOpen(false);
-     if(res?.error) alert(res.error);
+     
+     if(res?.success) {
+        setIsOpen(false);
+        setError(null);
+     }
+     
+     if(res?.error) {
+        // Qui gestiamo l'errore visivamente invece dell'alert
+        setError(res.error);
+     }
   }
 
   if (!isOpen) {
@@ -44,6 +58,14 @@ export function AddPatientModal() {
           </div>
           <button onClick={() => setIsOpen(false)} className="p-2 bg-gray-100 hover:bg-gray-200 rounded-full transition-colors"><X className="w-5 h-5" /></button>
         </div>
+
+        {/* BOX ERRORE ROSSO - STILE SITO */}
+        {error && (
+            <div className="mb-6 bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-xl text-sm flex items-center gap-3 shadow-sm animate-in fade-in slide-in-from-top-2">
+              <AlertCircle className="w-5 h-5 flex-shrink-0" />
+              <p>{error}</p>
+            </div>
+        )}
 
         <form action={handleSubmit} className="space-y-6">
           
@@ -74,12 +96,17 @@ export function AddPatientModal() {
                  <DateOfBirthPicker name="dob" />
             </div>
             
-            <ValidatedInput name="placeOfBirth" label="Luogo di Nascita" required />
+            <div className="grid grid-cols-2 gap-4">
+                <ValidatedInput name="placeOfBirth" label="Luogo di Nascita" required />
+                <ValidatedInput name="email" label="Email (Opzionale)" type="email" />
+            </div>
+
+            <PhoneInput />
+
           </div>
 
           <hr className="border-gray-100" />
 
-          {/* RESIDENZA GLOBALE */}
           <div>
              <h4 className="text-xs font-bold text-gray-400 uppercase tracking-wider flex items-center gap-2 mb-4">
                 <MapPin className="w-4 h-4" /> Domicilio

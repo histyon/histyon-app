@@ -1,30 +1,26 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
-import { Header } from '@/components/layout/Header'
-import type { Metadata } from 'next'
-
-export const metadata: Metadata = {
-  title: 'Console',
-}
+import { Header } from '@/components/layout/Header' // <--- USIAMO IL COMPONENTE ORIGINALE
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createClient()
+  
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/auth/login')
-  
-  // Prendo i dati per passarli all'header
+
+  // Recuperiamo il profilo per passarlo all'Header
   const { data: profile } = await supabase
     .from('profiles')
-    .select('*')
+    .select('first_name, last_name, hospital_name')
     .eq('id', user.id)
     .single()
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col font-sans">
-      
-      {/* HEADER UNIFICATO VARIANT APP (con dati profilo) */}
+      {/* HEADER ORIGINALE */}
       <Header variant="app" userProfile={profile} />
       
+      {/* CONTENUTO PAGINE */}
       {children}
     </div>
   )

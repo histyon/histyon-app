@@ -1,0 +1,47 @@
+import { createClient } from '@/lib/supabase/server'
+import { notFound } from 'next/navigation'
+import { ArrowLeft } from 'lucide-react'
+import Link from 'next/link'
+import { TicketRealtimeView } from '@/components/ticket/TicketRealTimeView'
+
+export default async function TicketPage(props: {
+  params: Promise<{ id: string }>
+}) {
+  const { id } = await props.params
+  const supabase = await createClient()
+
+  const { data: ticket } = await supabase
+    .from('tickets')
+    .select('*, patients(*)')
+    .eq('id', id)
+    .single()
+
+  if (!ticket) return notFound()
+
+  return (
+    // PADDING ESATTO HEADER: max-w-7xl + px-6
+    <div className="layout-container py-8 space-y-8">      
+      {/* HEADER NAVIGAZIONE */}
+      <div className="flex items-center gap-4">
+        <Link 
+            href={`/dashboard/patient/${ticket.patient_id}?tab=analysis`}
+            className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+        >
+            <ArrowLeft className="w-6 h-6 text-gray-700" />
+        </Link>
+        <div>
+            <h1 className="text-3xl font-bold tracking-tight text-gray-900 flex items-center gap-3">
+                Analisi #{ticket.id.slice(0, 8)}
+            </h1>
+            <p className="text-gray-500 text-sm mt-1">
+                Paziente: <span className="font-bold text-black">{ticket.patients.first_name} {ticket.patients.last_name}</span>
+            </p>
+        </div>
+      </div>
+
+      {/* COMPONENTE CLIENT UNICO */}
+      <TicketRealtimeView initialTicket={ticket} />
+
+    </div>
+  )
+}

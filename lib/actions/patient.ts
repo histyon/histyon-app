@@ -2,45 +2,58 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
-import { PatientSchema } from '@/lib/schemas'
+import { z } from 'zod'
 
-// funzione di aggiunta pazienti al db
+const PatientSchema = z.object({
+  firstName: z.string().min(2),
+  lastName: z.string().min(2),
+  fiscalCode: z.string().length(16),
+  dob: z.string(),
+  gender: z.enum(['M', 'F', 'OTHER']),
+  country: z.string().optional(),
+  placeOfBirth: z.string().optional(),
+  address: z.string().optional(),
+  city: z.string().optional(),
+  province: z.string().optional(),
+  postalCode: z.string().optional(),
+  // NUOVI CAMPI OBBLIGATORI
+  email: z.string().email("Email non valida"),
+  phoneNumber: z.string().min(5, "Numero troppo corto"),
+})
+
 export async function addPatient(prevState: any, formData: FormData) {
   const supabase = await createClient()
   
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return { error: 'Sessione scaduta. Ricarica la pagina.' }
+  if (!user) return { error: 'Non autorizzato' }
 
+  // COSTRUZIONE DATA
   const day = formData.get('dob_day')
   const month = formData.get('dob_month')
   const year = formData.get('dob_year')
   const fullDob = `${year}-${month}-${day}`
-  
-  const phoneFull = formData.get('phone') 
-    ? `${formData.get('phonePrefix')} ${formData.get('phone')}`
-    : null;
 
   const rawData = {
     firstName: formData.get('firstName'),
     lastName: formData.get('lastName'),
     fiscalCode: (formData.get('fiscalCode') as string).toUpperCase(),
-    email: formData.get('email'),
     dob: fullDob,
     gender: formData.get('gender'),
     country: formData.get('country'),
     placeOfBirth: formData.get('placeOfBirth'),
-    addressStreet: formData.get('addressStreet'),
-    addressCivic: formData.get('addressCivic'),
+    address: formData.get('address'),
     city: formData.get('city'),
-    province: formData.get('region'), 
+    province: formData.get('province'),
     postalCode: formData.get('postalCode'),
-    phone: phoneFull
+    // NUOVI
+    email: formData.get('email'),
+    phoneNumber: formData.get('phoneNumber'),
   }
 
-  // uso lo schema importato
   const validated = PatientSchema.safeParse(rawData)
-  if (!validated.success) return { error: 'Dati incompleti o formato errato.' }
+  if (!validated.success) return { error: validated.error.issues[0].message }
 
+  // Check duplicati
   const { data: existing } = await supabase
     .from('patients')
     .select('id')
@@ -50,36 +63,25 @@ export async function addPatient(prevState: any, formData: FormData) {
 
   if (existing) return { error: 'Paziente già presente in archivio.' }
 
-  try {
-      const { error } = await supabase.from('patients').insert({
-        doctor_id: user.id,
-        first_name: validated.data.firstName,
-        last_name: validated.data.lastName,
-        fiscal_code: validated.data.fiscalCode,
-        email: validated.data.email || null,
-        date_of_birth: validated.data.dob,
-        gender: validated.data.gender,
-        country: validated.data.country,
-        place_of_birth: validated.data.placeOfBirth, 
-        address_street: validated.data.addressStreet,
-        address_civic: validated.data.addressCivic,
-        city: validated.data.city,
-        province: validated.data.province,
-        region: validated.data.province,
-        postal_code: validated.data.postalCode,
-        phone_number: validated.data.phone
-      })
+  const { error } = await supabase.from('patients').insert({
+    doctor_id: user.id,
+    first_name: validated.data.firstName,
+    last_name: validated.data.lastName,
+    fiscal_code: validated.data.fiscalCode,
+    date_of_birth: validated.data.dob,
+    gender: validated.data.gender,
+    country: validated.data.country,
+    place_of_birth: validated.data.placeOfBirth,
+    address: validated.data.address,
+    city: validated.data.city,
+    region: validated.data.province,
+    postal_code: validated.data.postalCode,
+    email: validated.data.email,
+    phone_number: validated.data.phoneNumber
+  })
 
-      if (error) {
-        console.error("Errore DB:", error)
-        if (error.code === '23503') return { error: 'Errore Critico: Profilo Dottore non trovato. Contatta assistenza.' }
-        return { error: error.message }
-      }
+  if (error) return { error: error.message }
 
-      revalidatePath('/dashboard')
-      return { success: true }
-      
-  } catch (e) {
-      return { error: 'Errore di connessione al database.' }
-  }
+  revalidatePath('/dashboard')
+  return { success: true }
 }

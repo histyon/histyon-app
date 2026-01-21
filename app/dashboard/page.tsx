@@ -1,66 +1,69 @@
 import { createClient } from '@/lib/supabase/server'
-import { AddPatientModal } from '@/components/patients/AddPatientModal'
+import { redirect } from 'next/navigation'
 import { PatientList } from '@/components/patients/PatientList'
-import { Search, User, FileClock } from 'lucide-react'
+import { AddPatientModal } from '@/components/patients/AddPatientModal'
+import { TicketList } from '@/components/dashboard/TicketList'
+import { Users, Activity } from 'lucide-react'
+import Link from 'next/link'
 
-// forza aggiornamento dei dati dal db
-export const dynamic = 'force-dynamic' 
+export default async function DashboardPage(props: {
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>
+}) {
+  const searchParams = await props.searchParams
+  const tab = typeof searchParams.tab === 'string' ? searchParams.tab : 'patients'
 
-export default async function Dashboard() {
-  // connessione al db e prendo i dati del medico loggato
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
-  
-  //  prendo i dati dei pazienti del medico loggato
+  if (!user) redirect('/auth/login')
+
   const { data: patients } = await supabase
     .from('patients')
     .select('*')
-    .eq('doctor_id', user!.id)
+    .eq('doctor_id', user.id)
+    .order('created_at', { ascending: false })
+
+  const { data: allTickets } = await supabase
+    .from('tickets')
+    .select('*, patients(first_name, last_name)') 
+    .eq('doctor_id', user.id)
     .order('created_at', { ascending: false })
 
   return (
-    <main className="max-w-7xl mx-auto p-6 space-y-8 w-full">
-      <div className="flex justify-between items-end">
+    // PADDING CORRETTO: max-w-7xl e px-6 (identico all'Header)
+    <div className="layout-container py-8 space-y-8">      
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
-          <h1 className="text-2xl font-bold mb-1">Pazienti & Analisi</h1>
-          <p className="text-gray-500">Gestisci le anagrafiche e avvia nuove analisi.</p>
+          <h1 className="text-3xl font-bold text-gray-900 tracking-tight">Console Medica</h1>
         </div>
-        <AddPatientModal />
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
-          <div className="flex items-center gap-2 text-gray-500 mb-2">
-            <User className="w-5 h-5" />
-            <span className="text-sm font-medium">Pazienti Registrati</span>
-          </div>
-          <div className="text-3xl font-bold">{patients?.length || 0}</div>
-        </div>
-        <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm opacity-60">
-          <div className="flex items-center gap-2 text-gray-500 mb-2">
-            <FileClock className="w-5 h-5" />
-            <span className="text-sm font-medium">Analisi Totali</span>
-          </div>
-          <div className="text-3xl font-bold">0</div>
+        
+        <div className="bg-gray-100 p-1 rounded-xl flex items-center font-medium text-sm">
+           <Link href="?tab=patients" scroll={false} className={`px-4 py-2 rounded-lg transition-all flex items-center gap-2 ${tab === 'patients' ? 'bg-white shadow-sm text-black' : 'text-gray-500 hover:text-gray-900'}`}>
+             <Users className="w-4 h-4" /> Pazienti
+           </Link>
+           <Link href="?tab=analysis" scroll={false} className={`px-4 py-2 rounded-lg transition-all flex items-center gap-2 ${tab === 'analysis' ? 'bg-white shadow-sm text-black' : 'text-gray-500 hover:text-gray-900'}`}>
+             <Activity className="w-4 h-4" /> Analisi
+           </Link>
         </div>
       </div>
 
-      <div className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden min-h-[400px]">
-        <div className="p-4 border-b border-gray-200 bg-gray-50/50 flex gap-4">
-          <Search className="w-5 h-5 text-gray-400" />
-          <input type="text" placeholder="Cerca paziente..." className="bg-transparent outline-none text-sm w-full" />
+      {tab === 'patients' && (
+        <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
+           <div className="flex justify-between items-center">
+              <h2 className="text-xl font-bold">Anagrafica Pazienti</h2>
+              <AddPatientModal />
+           </div>
+           <PatientList patients={patients || []} />
         </div>
+      )}
 
-        {!patients || patients.length === 0 ? (
-          <div className="flex flex-col items-center justify-center h-64 text-gray-400">
-            <User className="w-12 h-12 mb-2 opacity-20" />
-            <p>Nessun paziente trovato.</p>
-            <p className="text-xs">Aggiungi il primo paziente per iniziare.</p>
-          </div>
-        ) : (
-          <PatientList patients={patients} />
-        )}
-      </div>
-    </main>
+      {tab === 'analysis' && (
+        <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
+           <div className="flex justify-between items-center">
+              <h2 className="text-xl font-bold">Cronologia Globale Analisi</h2>
+           </div>
+           <TicketList tickets={allTickets || []} showPatientName={true} />
+        </div>
+      )}
+    </div>
   )
 }

@@ -14,8 +14,10 @@ export default function RegisterPage() {
       
       <AuthSidebar />
 
-      <div className="flex-1 flex flex-col items-center p-6 h-screen overflow-hidden">
-        
+      <div 
+        className="flex-1 flex flex-col items-center h-screen overflow-hidden"
+        style={{ padding: '1.5rem var(--app-px)' }} 
+      >        
         <div className="w-full max-w-xl flex flex-col h-full py-6">
             
             <div className="mb-5">
@@ -23,7 +25,7 @@ export default function RegisterPage() {
                <p className="text-gray-500">Configurazione guidata utente.</p>
             </div>
 
-            <div className="flex-1 mb-4 overflow-hidden flex flex-col">
+            <div className="flex-1 overflow-hidden flex flex-col">
                  <RegisterForm />
             </div>
 

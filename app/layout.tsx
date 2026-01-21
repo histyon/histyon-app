@@ -4,11 +4,11 @@ import "./globals.css";
 export const metadata: Metadata = {
   title: {
     template: '%s | Histyon',
-    default: 'Histyon',
+    default: 'Home | Histyon',
   },
   description: "Advanced Medical Diagnostics",
   icons: {
-    icon: '/logo-black2.png', 
+    icon: '/logo-white.png', 
   }
 };
 

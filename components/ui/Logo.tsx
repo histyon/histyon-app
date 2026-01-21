@@ -9,7 +9,7 @@ export function Logo({ color = 'black', className }: LogoProps) {
   return (
     <div className={`relative ${className}`}>
       <Image 
-        src={color === 'black' ? '/logo-black2.png' : '/logo-white2.png'} 
+        src={color === 'black' ? '/logo-black.png' : '/logo-white.png'} 
         alt="Histyon Logo" 
         width={150} 
         height={50}

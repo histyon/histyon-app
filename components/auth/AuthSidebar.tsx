@@ -20,8 +20,12 @@ export function AuthSidebar() {
   }, [index])
 
   return (
-    <div className="hidden lg:flex w-[45%] bg-black text-white flex-col justify-between relative overflow-hidden py-6 pl-6 xl:pl-[calc((100vw-1280px)/2+1.5rem)] pr-16 xl:pr-32">
-      
+  <div 
+      className="hidden lg:flex w-[45%] bg-black text-white flex-col justify-between relative overflow-hidden py-6 pr-16 xl:pr-32"
+      style={{
+        paddingLeft: 'calc((100vw - 80rem) / 2 + var(--app-px))' 
+      }}
+    >      
       <div className="absolute inset-0 bg-gradient-to-b from-white/5 to-transparent pointer-events-none"></div>
 
       <Link href="/" className="relative z-10 block hover:opacity-80 transition-opacity">

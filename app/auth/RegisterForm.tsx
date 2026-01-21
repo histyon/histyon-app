@@ -6,6 +6,7 @@ import { COUNTRY_MAP, ITALIAN_PROVINCES } from '@/lib/constants'
 
 // --- 1. COMPONENTI BASE UI (Input, Button, Select) ---
 
+// INPUT BASE
 export interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {}
 
 export const Input = React.forwardRef<HTMLInputElement, InputProps>(
@@ -22,6 +23,7 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
 )
 Input.displayName = "Input"
 
+// BUTTON BASE
 export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {}
 
 export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
@@ -37,7 +39,7 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
 )
 Button.displayName = "Button"
 
-// --- Custom Select Implementation ---
+// SELECT FAMILY (Custom implementation leggera senza Radix per velocità)
 interface SelectContextType {
   value: string
   onChange: (value: string) => void
@@ -57,6 +59,7 @@ export function Select({ children, value, onValueChange, defaultValue, name }: {
     setOpen(false)
   }
 
+  // Click outside to close
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
@@ -73,6 +76,7 @@ export function Select({ children, value, onValueChange, defaultValue, name }: {
     <SelectContext.Provider value={{ value: currentValue, onChange: handleValueChange, open, setOpen }}>
       <div className="relative w-full" ref={containerRef}>
         {children}
+        {/* Hidden input per form submission standard HTML */}
         {name && <input type="hidden" name={name} value={currentValue} />}
       </div>
     </SelectContext.Provider>
@@ -95,6 +99,13 @@ export function SelectTrigger({ children, className }: { children: React.ReactNo
   )
 }
 
+export function SelectValue({ placeholder }: { placeholder?: string }) {
+  const ctx = useContext(SelectContext)
+  // Qui potremmo mappare il value con il label se avessimo accesso ai children, ma per semplicità renderizziamo il value o children passati
+  // Nel caso specifico del form, il trigger ha children custom, quindi questo componente è spesso vuoto o mostra il value raw
+  return <span className="pointer-events-none">{placeholder}</span>
+}
+
 export function SelectContent({ children, className }: { children: React.ReactNode, className?: string }) {
   const ctx = useContext(SelectContext)
   if (!ctx || !ctx.open) return null
@@ -111,12 +122,13 @@ export function SelectContent({ children, className }: { children: React.ReactNo
 export function SelectItem({ value, children, className }: { value: string, children: React.ReactNode, className?: string }) {
   const ctx = useContext(SelectContext)
   if (!ctx) throw new Error("SelectItem must be used within Select")
+  
   const isSelected = ctx.value === value
 
   return (
     <div
       onClick={() => ctx.onChange(value)}
-      className={`relative flex w-full cursor-default select-none items-center rounded-lg py-1.5 pl-2 pr-8 text-sm outline-none hover:bg-gray-100 focus:bg-gray-100 focus:text-gray-900 cursor-pointer ${className} ${isSelected ? 'bg-gray-50 font-medium' : ''}`}
+      className={`relative flex w-full cursor-default select-none items-center rounded-lg py-1.5 pl-2 pr-8 text-sm outline-none hover:bg-gray-100 focus:bg-gray-100 focus:text-gray-900 data-[disabled]:pointer-events-none data-[disabled]:opacity-50 cursor-pointer ${className} ${isSelected ? 'bg-gray-50 font-medium' : ''}`}
     >
       <span className="absolute right-2 flex h-3.5 w-3.5 items-center justify-center">
         {isSelected && <Check className="h-4 w-4" />}
@@ -127,7 +139,7 @@ export function SelectItem({ value, children, className }: { value: string, chil
 }
 
 
-// --- 2. COMPONENTI SMART ---
+// --- 2. COMPONENTI SMART (ValidatedInput, etc.) ---
 
 interface ValidatedInputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   label?: string
@@ -186,13 +198,17 @@ export function ValidatedInput({
           {...props}
           type={inputType}
           value={value} 
-          className={`pr-10 ${borderClass} ${className || ''}`}
+          className={`
+            pr-10 ${borderClass} ${className || ''}
+            focus-visible:ring-4 transition-all duration-200
+          `}
           onBlur={() => setTouched(true)}
           onChange={(e) => {
             setValue(e.target.value)
             if (props.onChange) props.onChange(e)
           }}
         />
+
         {type === 'password' && (
           <button 
             type="button" 
@@ -203,8 +219,17 @@ export function ValidatedInput({
             {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
           </button>
         )}
-        {type !== 'password' && isError && <AlertCircle className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-red-500 pointer-events-none" />}
-        {type !== 'password' && isSuccess && <CheckCircle2 className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-green-500 pointer-events-none" />}
+
+        {type !== 'password' && isError && (
+            <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">
+                <AlertCircle className="w-4 h-4 text-red-500" />
+            </div>
+        )}
+        {type !== 'password' && isSuccess && (
+            <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">
+                <CheckCircle2 className="w-4 h-4 text-green-500" />
+            </div>
+        )}
       </div>
       
       {displayError && touched && !isValid && (
@@ -212,64 +237,6 @@ export function ValidatedInput({
           • {displayError}
         </p>
       )}
-    </div>
-  )
-}
-
-// --- NUOVO COMPONENTE PHONE INPUT "PRO" ---
-export function PhoneInput({ name = "phoneNumber", label = "Telefono Cellulare", defaultValue = "" }) {
-  const defaultCountry = COUNTRY_MAP.find(c => c.code === 'IT') || COUNTRY_MAP[0]
-  const [prefix, setPrefix] = useState(defaultCountry.dial_code)
-  
-  // Calcolo bandiera corrente per il trigger (quando chiuso)
-  const currentCountry = COUNTRY_MAP.find(c => c.dial_code === prefix) || defaultCountry
-
-  return (
-    <div className="space-y-1">
-       {label && <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider ml-1">{label} *</label>}
-       
-       <div className="flex gap-2">
-          {/* SELETTORE PREFISSO */}
-          <div className="w-[140px] shrink-0">
-             <Select 
-                name="phonePrefix"
-                value={prefix} 
-                onValueChange={setPrefix}
-             >
-                <SelectTrigger className="h-12 bg-white">
-                   <div className="flex items-center gap-2">
-                      <span className="text-base">{currentCountry.flag}</span>
-                      <span className="text-gray-900">{currentCountry.dial_code}</span>
-                   </div>
-                </SelectTrigger>
-                
-                {/* MODIFICA QUI: max-h-[250px] (meno alto) e w-[400px] (più largo) */}
-                <SelectContent className="max-h-[250px] w-[400px]">
-                   {COUNTRY_MAP.map((c) => (
-                      <SelectItem key={c.code} value={c.dial_code} className="py-2.5">
-                         <div className="flex items-center gap-3 w-full">
-                            <span className="text-lg flex-shrink-0">{c.flag}</span>
-                            {/* Nomi lunghi ora hanno più spazio */}
-                            <span className="font-medium text-gray-700 flex-1 truncate text-left">{c.name}</span>
-                            <span className="text-gray-400 font-mono text-xs">{c.dial_code}</span>
-                         </div>
-                      </SelectItem>
-                   ))}
-                </SelectContent>
-             </Select>
-          </div>
-
-          {/* INPUT NUMERO */}
-          <Input 
-             name={name}
-             required 
-             type="tel" 
-             placeholder="333 1234567" 
-             className="flex-1"
-             pattern="^[0-9\s]+$"
-             defaultValue={defaultValue}
-          />
-       </div>
     </div>
   )
 }
@@ -289,6 +256,7 @@ export function GlobalLocationSelector() {
         setRegions([])
         return
       }
+      
       setLoadingRegions(true)
       try {
         const response = await fetch('https://countriesnow.space/api/v0.1/countries/states', {
@@ -322,6 +290,7 @@ export function GlobalLocationSelector() {
                 }}
             >
                 <SelectTrigger className="h-12">
+                   {/* Fallback display se non abbiamo accesso allo stato interno del trigger facilmente */}
                    <span className="truncate">{COUNTRY_MAP.find(c => c.code === selectedCountryCode)?.name || "Seleziona"}</span>
                 </SelectTrigger>
                 <SelectContent>
@@ -334,29 +303,56 @@ export function GlobalLocationSelector() {
         
         <div className="grid grid-cols-4 gap-4">
              <div className="col-span-3">
-                <ValidatedInput name="addressStreet" label="Indirizzo" placeholder="Via/Piazza" required errorMessage="Obbligatorio" />
+                <ValidatedInput 
+                    name="addressStreet" 
+                    label="Indirizzo" 
+                    placeholder="Via/Piazza" 
+                    required 
+                    errorMessage="Obbligatorio" 
+                />
              </div>
              <div className="col-span-1">
-                <ValidatedInput name="addressCivic" label="Civico" placeholder="N." required errorMessage="!" />
+                <ValidatedInput 
+                    name="addressCivic" 
+                    label="Civico" 
+                    placeholder="N." 
+                    required 
+                    errorMessage="!" 
+                />
              </div>
         </div>
 
         <div className="grid grid-cols-6 gap-4">
             <div className="col-span-2">
-                 <ValidatedInput name="postalCode" label="CAP" placeholder="00100" required errorMessage="Obbligatorio" />
+                 <ValidatedInput 
+                    name="postalCode" 
+                    label="CAP" 
+                    placeholder="00100" 
+                    required 
+                    errorMessage="Obbligatorio" 
+                 />
             </div>
             <div className="col-span-2">
-                 <ValidatedInput name="city" label="Città" placeholder="Comune" required errorMessage="Obbligatorio" />
+                 <ValidatedInput 
+                    name="city" 
+                    label="Città" 
+                    placeholder="Comune" 
+                    required 
+                    errorMessage="Obbligatorio" 
+                 />
             </div>
             <div className="col-span-2 relative">
                  <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5 ml-1">Provincia *</label>
+                 
                  {loadingRegions ? (
                     <div className="w-full px-4 py-3 border border-gray-100 rounded-xl bg-gray-50 flex items-center text-gray-400 text-xs h-12">
                         <Loader2 className="w-3 h-3 animate-spin mr-2" /> Caricamento...
                     </div>
                  ) : regions.length > 0 ? (
                     <Select name="region" defaultValue="">
-                        <SelectTrigger className="h-12"><span className="truncate">Seleziona</span></SelectTrigger>
+                        <SelectTrigger className="h-12">
+                             <span className="truncate">Seleziona</span>
+                        </SelectTrigger>
                         <SelectContent>
                             {regions.map((r, idx) => (
                                 <SelectItem key={idx} value={r.name.replace('Province of ', '')}>
@@ -366,7 +362,11 @@ export function GlobalLocationSelector() {
                         </SelectContent>
                     </Select>
                  ) : (
-                    <Input name="region" placeholder="Provincia/Stato" required />
+                    <Input 
+                        name="region" 
+                        placeholder="Provincia/Stato" 
+                        required 
+                    />
                  )}
             </div>
         </div>

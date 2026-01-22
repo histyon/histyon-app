@@ -8,7 +8,7 @@ import { getPresignedUploadUrl, confirmUpload } from '@/lib/actions/storage'
 export function InlineFileUploader({ patientId }: { patientId: string }) {
   const router = useRouter()
   const [file, setFile] = useState<File | null>(null)
-  const [notes, setNotes] = useState('') // STATO PER LE NOTE
+  const [notes, setNotes] = useState('')
   const [progress, setProgress] = useState(0)
   const [status, setStatus] = useState<'idle' | 'uploading' | 'success' | 'error'>('idle')
   const [errorMessage, setErrorMessage] = useState('')
@@ -28,7 +28,6 @@ export function InlineFileUploader({ patientId }: { patientId: string }) {
     setStatus('uploading')
 
     try {
-      // Passiamo anche le notes
       const presignedRes = await getPresignedUploadUrl(file.name, file.type, file.size, patientId, notes)
       
       if (presignedRes.error || !presignedRes.url) {
@@ -53,7 +52,7 @@ export function InlineFileUploader({ patientId }: { patientId: string }) {
           
           setTimeout(() => {
             setFile(null)
-            setNotes('') // Reset note
+            setNotes('')
             setStatus('idle')
             setProgress(0)
             if (fileInputRef.current) fileInputRef.current.value = ''
@@ -87,7 +86,6 @@ export function InlineFileUploader({ patientId }: { patientId: string }) {
         >
           <input type="file" ref={fileInputRef} onChange={handleFileChange} className="hidden" disabled={status !== 'idle'} />
 
-          {/* STATO 1: NESSUN FILE */}
           {status === 'idle' && !file && (
             <>
               <div className="bg-gray-50 border border-gray-200 p-3 rounded-full mb-3 shadow-sm group-hover:scale-110 transition-transform">
@@ -98,7 +96,6 @@ export function InlineFileUploader({ patientId }: { patientId: string }) {
             </>
           )}
 
-          {/* STATO 2: FILE SELEZIONATO (Mostra input note) */}
           {status === 'idle' && file && (
             <div className="w-full max-w-md space-y-4 cursor-default">
               <div className="flex items-center gap-4 bg-gray-50 p-3 rounded-lg border border-gray-200">
@@ -112,7 +109,6 @@ export function InlineFileUploader({ patientId }: { patientId: string }) {
                  <button onClick={(e) => { e.stopPropagation(); setFile(null); }} className="text-xs text-red-500 hover:underline px-2">Rimuovi</button>
               </div>
 
-              {/* INPUT NOTE CLINICHE */}
               <div className="relative">
                  <div className="absolute top-3 left-3 text-gray-400">
                     <FileText className="w-4 h-4" />
@@ -135,7 +131,6 @@ export function InlineFileUploader({ patientId }: { patientId: string }) {
             </div>
           )}
 
-          {/* STATO 3: UPLOADING */}
           {status === 'uploading' && (
              <div className="w-full max-w-xs text-center h-full flex flex-col justify-center">
                 <div className="flex items-center justify-center gap-2 mb-2">
@@ -149,7 +144,6 @@ export function InlineFileUploader({ patientId }: { patientId: string }) {
              </div>
           )}
 
-          {/* STATO 4: SUCCESS */}
           {status === 'success' && (
              <div className="h-full flex flex-col justify-center items-center">
                <CheckCircle2 className="w-12 h-12 text-green-600 mb-2 animate-in zoom-in" />
@@ -158,7 +152,6 @@ export function InlineFileUploader({ patientId }: { patientId: string }) {
              </div>
           )}
 
-          {/* STATO 5: ERROR */}
           {status === 'error' && (
              <div className="h-full flex flex-col justify-center items-center">
                <AlertCircle className="w-10 h-10 text-red-600 mb-2" />

@@ -1,7 +1,8 @@
 import { z } from 'zod'
 import { REGEX_VALIDATORS } from './constants'
 
-// qui definiamo gli schemi di validazione usando le stesse regex del frontend
+// qui definiamo le regole di validazione che uso sia nel form che nelle server actions
+// usiamo le regex per essere sicuro che nome, cf e password rispettino i formati corretti
 
 export const PasswordSchema = z.string()
   .min(8, "La password deve essere di almeno 8 caratteri")

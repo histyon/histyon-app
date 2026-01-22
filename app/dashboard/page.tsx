@@ -29,7 +29,6 @@ export default async function DashboardPage(props: {
     .order('created_at', { ascending: false })
 
   return (
-    // PADDING CORRETTO: max-w-7xl e px-6 (identico all'Header)
     <div className="layout-container py-8 space-y-8">      
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>

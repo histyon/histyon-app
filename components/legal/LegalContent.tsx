@@ -3,7 +3,6 @@
 import { useState } from 'react'
 import { Shield, Scale, Cookie, Lock, FileText } from 'lucide-react'
 
-// TABS CONFIGURATION
 const TABS = [
   { id: 'privacy', label: 'Privacy Policy', icon: Shield },
   { id: 'terms', label: 'Termini di Servizio', icon: Scale },
@@ -16,7 +15,6 @@ export function LegalContent() {
 
   return (
     <>
-{/* HEADER SEZIONE - ALLINEATO A SINISTRA */}
       <div className="bg-gray-50 border-b border-gray-200 py-16">
         <div className="w-full max-w-7xl mx-auto px-6 text-left space-y-4">
           <h1 className="text-4xl md:text-5xl font-bold tracking-tight">Centro Legale & Privacy</h1>
@@ -29,10 +27,8 @@ export function LegalContent() {
         </div>
       </div>
 
-      {/* NAVIGAZIONE TABS - ALLINEATA A SINISTRA */}
       <div className="sticky top-20 z-40 bg-white/80 backdrop-blur-md border-b border-gray-100">
         <div className="w-full max-w-7xl mx-auto px-6 overflow-x-auto scrollbar-hide">
-           {/* Rimosso md:justify-center e px-4 per allineamento perfetto a sinistra */}
            <div className="flex justify-start min-w-max">
               {TABS.map((tab) => (
                 <button
@@ -56,10 +52,8 @@ export function LegalContent() {
         </div>
       </div>
 
-      {/* CONTENUTO */}
       <main className="flex-1 w-full max-w-7xl mx-auto px-6 py-12 md:py-16 max-w-4xl mx-auto">
         
-        {/* PRIVACY POLICY */}
         {activeTab === 'privacy' && (
           <div className="space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-300">
              <SectionTitle title="Informativa sulla Privacy" subtitle="Ai sensi del Regolamento UE 2016/679 (GDPR)" />
@@ -96,7 +90,6 @@ export function LegalContent() {
           </div>
         )}
 
-        {/* TERMINI DI SERVIZIO */}
         {activeTab === 'terms' && (
           <div className="space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-300">
             <SectionTitle title="Termini e Condizioni" subtitle="Regolamento per l'utilizzo della Console Medica" />
@@ -122,7 +115,6 @@ export function LegalContent() {
           </div>
         )}
 
-        {/* COOKIE POLICY */}
         {activeTab === 'cookie' && (
           <div className="space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-300">
             <SectionTitle title="Cookie Policy" subtitle="Trasparenza sui tracciamenti" />
@@ -147,7 +139,6 @@ export function LegalContent() {
           </div>
         )}
 
-        {/* DPA / HIPAA */}
         {activeTab === 'dpa' && (
            <div className="space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-300">
              <SectionTitle title="Data Processing & Sicurezza" subtitle="Appendice tecnica sulla sicurezza dei dati" />
@@ -180,7 +171,6 @@ export function LegalContent() {
   )
 }
 
-// COMPONENTI UTILITY LOCALI
 function SectionTitle({ title, subtitle }: { title: string, subtitle: string }) {
   return (
     <div className="border-b border-gray-100 pb-6 mb-6">

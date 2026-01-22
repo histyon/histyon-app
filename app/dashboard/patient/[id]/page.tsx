@@ -77,7 +77,6 @@ export default async function PatientDetailPage(props: {
       </div>
 
       {tab === 'analysis' && (
-        // RIMOSSO max-w-5xl, ORA è w-full (Larghezza massima)
         <div className="animate-in fade-in slide-in-from-bottom-2 duration-300 w-full">
            <InlineFileUploader patientId={patient.id} />
            <div className="mt-8">
@@ -88,7 +87,6 @@ export default async function PatientDetailPage(props: {
       )}
 
       {tab === 'profile' && (
-        // RIMOSSO max-w-4xl, ORA è w-full (Larghezza massima)
         <div className="bg-white p-8 rounded-2xl border border-gray-200 shadow-sm animate-in fade-in slide-in-from-bottom-2 duration-300 w-full">
            <h3 className="font-bold text-gray-900 text-lg mb-6 flex items-center gap-2">
              <div className="w-1 h-6 bg-black rounded-full"></div>

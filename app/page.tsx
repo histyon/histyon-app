@@ -10,12 +10,10 @@ export default function LandingPage() {
       
       <Header variant="public" />
 
-      {/* CLASSE UNIFICATA: max-w-7xl + mx-auto + px-6 */}
       <main className="flex-1 pt-20 pb-20 w-full max-w-7xl mx-auto px-6">
         
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center h-full">
           
-          {/* --- COLONNA SX: TESTI (INVARIATA) --- */}
           <div className="space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-700 flex flex-col justify-center">
             
             <h1 className="text-4xl md:text-6xl font-bold tracking-tight leading-[1.1]">
@@ -62,21 +60,14 @@ export default function LandingPage() {
             </div>
           </div>
           
-          {/* --- COLONNA DX: MOCKUP --- */}
-          {/* Container Esterno (Invariato dall'originale) */}
           <div className="hidden lg:flex relative h-[600px] bg-gray-50 rounded-2xl border border-gray-100 overflow-hidden items-center justify-center">
              
-             {/* Background Pattern */}
              <div className="absolute inset-0 bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] [background-size:16px_16px] opacity-50"></div>
              
-             {/* BOX CONSOLE INTERNO */}
-             {/* QUI APPLICO LE CLASSI ORIGINALI: w-3/4 h-3/4 rotate-[-1deg] hover:rotate-0 */}
              <div className="relative w-3/4 h-3/4 bg-white rounded-xl shadow-2xl border border-gray-200 flex flex-col overflow-hidden rotate-[-2deg] hover:rotate-0 transition-transform duration-500">
                 
-                {/* 1. HEADER (Replica fedele app/dashboard) */}
                 <div className="bg-white border-b border-gray-100 h-14 flex items-center justify-between px-4 shrink-0">
                    <div className="flex items-center gap-3">
-                      {/* Logo stilizzato */}
                       <div className="w-5 h-5 bg-black rounded flex items-center justify-center">
                         <div className="w-2 h-2 bg-white rounded-full"></div>
                       </div>
@@ -87,10 +78,8 @@ export default function LandingPage() {
                    </div>
                 </div>
 
-                {/* 2. BODY (Contenuto Console) */}
                 <div className="flex-1 bg-gray-50 p-4 flex flex-col gap-4 overflow-hidden">
                     
-                    {/* Page Title */}
                     <div className="flex justify-between items-center">
                         <div>
                             <div className="h-4 w-32 bg-gray-200 rounded mb-2"></div>
@@ -101,24 +90,18 @@ export default function LandingPage() {
                         </div>
                     </div>
 
-                    {/* Timeline Status */}
                     <div className="bg-white p-3 rounded-xl border border-gray-100 shadow-sm flex items-center justify-between relative px-6">
                         <div className="absolute top-1/2 left-4 right-4 h-0.5 bg-gray-50 -z-10"></div>
-                        {/* Completed Steps */}
                         <div className="w-6 h-6 rounded bg-green-50 border border-green-100 flex items-center justify-center text-green-600"><Check className="w-3 h-3" /></div>
                         <div className="w-6 h-6 rounded bg-green-50 border border-green-100 flex items-center justify-center text-green-600"><Check className="w-3 h-3" /></div>
-                        {/* Processing Step */}
                         <div className="w-8 h-8 rounded-lg bg-purple-100 border border-purple-200 flex items-center justify-center text-purple-600 ring-2 ring-purple-50 animate-pulse">
                              <BrainCircuit className="w-4 h-4" />
                         </div>
-                        {/* Todo Step */}
                         <div className="w-6 h-6 rounded bg-gray-50 border border-gray-100"></div>
                     </div>
 
-                    {/* Content Grid */}
                     <div className="flex gap-4 h-full min-h-0">
                         
-                        {/* SX: File Info */}
                         <div className="w-1/3 space-y-3">
                             <div className="bg-white p-3 rounded-xl border border-gray-100 h-24 space-y-2">
                                 <div className="h-2 w-10 bg-gray-100 rounded-full"></div>
@@ -132,7 +115,6 @@ export default function LandingPage() {
                             </div>
                         </div>
 
-                        {/* DX: AI Box */}
                         <div className="flex-1 relative">
                              <div className="absolute inset-0 bg-purple-600 rounded-xl shadow-lg shadow-purple-500/20 p-4 flex flex-col justify-between overflow-hidden">
                                 <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-2xl -mr-8 -mt-8 pointer-events-none"></div>

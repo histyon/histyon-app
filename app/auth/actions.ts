@@ -9,33 +9,32 @@ const PasswordSchema = z.string()
   .regex(/[A-Z]/, "Deve contenere almeno una lettera Maiuscola")
   .regex(/[!@#$%^&*(),.?":{}|<>]/, "Deve contenere almeno un carattere speciale");
 
-// Definiamo il tipo di stato che ritorna l'azione
+// definiamo il tipo di stato che ritorna l'azione
 export type SignupState = {
   status: 'idle' | 'success' | 'error';
-  errors?: { [key: string]: string }; // Mappa errori campo -> messaggio
-  message?: string; // Errore generico
-  inputs?: any; // Dati inseriti per ripopolare il form
+  errors?: { [key: string]: string }; // mappa errori campo -> messaggio
+  message?: string; // errore generico
+  inputs?: any; // dati inseriti per ripopolare il form
 }
 
-// Modifichiamo la firma per accettare prevState (richiesto da useFormState)
 export async function signup(prevState: SignupState, formData: FormData): Promise<SignupState> {
   const supabase = await createClient()
 
-  // Raccogliamo i dati grezzi subito per poterli restituire in caso di errore
+  // raccogliamo i dati grezzi subito per poterli restituire in caso di errore
   const rawData = Object.fromEntries(formData)
   const password = formData.get('password') as string
 
-  // 1. Validazione Password
+  // validazione Password
   const passCheck = PasswordSchema.safeParse(password)
   if (!passCheck.success) {
      return {
        status: 'error',
        errors: { password: passCheck.error.issues[0].message },
-       inputs: rawData // Restituiamo i dati così il form non si svuota
+       inputs: rawData // restituiamo i dati così il form non si svuota
      }
   }
 
-  // Costruzione Data
+  // costruzione Data
   const day = formData.get('dob_day')
   const month = formData.get('dob_month')
   const year = formData.get('dob_year')
@@ -59,14 +58,14 @@ export async function signup(prevState: SignupState, formData: FormData): Promis
     postalCode: formData.get('postalCode') as string,
   }
 
-  // 2. Signup Supabase
+  // signup Supabase
   const { data: authData, error: authError } = await supabase.auth.signUp({
     email: userData.email,
     password: userData.password,
   })
 
   if (authError) {
-    // Mappiamo l'errore comune "User already registered" sul campo email
+    // mappiamo l'errore comune "User already registered" sul campo email
     let fieldErrors: any = {}
     if (authError.message.includes('already registered') || authError.status === 422) {
         fieldErrors.email = "Questa email è già registrata."
@@ -80,7 +79,7 @@ export async function signup(prevState: SignupState, formData: FormData): Promis
     }
   }
 
-  // 3. Creazione Profilo
+  // ceazione Profilo
   if (authData.user) {
     const { error: profileError } = await supabase.from('profiles').insert({
       id: authData.user.id,
@@ -102,8 +101,7 @@ export async function signup(prevState: SignupState, formData: FormData): Promis
     })
     
     if (profileError) {
-        // Se fallisce il profilo, non possiamo lasciare l'utente a metà.
-        // In produzione dovresti cancellare l'utente auth, qui diamo errore.
+        // se fallisce il profilo, non possiamo lasciare l'utente a metà.
         return {
             status: 'error',
             message: "Errore salvataggio profilo: " + profileError.message,
@@ -112,7 +110,6 @@ export async function signup(prevState: SignupState, formData: FormData): Promis
     }
   }
 
-  // Se tutto ok, redirect.
-  // NON returniamo state qui perché il redirect interrompe l'esecuzione.
+  // se tutto ok, redirect.
   redirect('/auth/register/success')
 }

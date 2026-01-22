@@ -4,8 +4,6 @@ import React, { useState, useEffect, useRef, createContext, useContext } from 'r
 import { Eye, EyeOff, Loader2, AlertCircle, CheckCircle2, ChevronDown, Check } from 'lucide-react'
 import { COUNTRY_MAP, ITALIAN_PROVINCES } from '@/lib/constants'
 
-// --- 1. COMPONENTI BASE UI (Input, Button, Select) ---
-
 export interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {}
 
 export const Input = React.forwardRef<HTMLInputElement, InputProps>(
@@ -37,7 +35,6 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
 )
 Button.displayName = "Button"
 
-// --- Custom Select Implementation ---
 interface SelectContextType {
   value: string
   onChange: (value: string) => void
@@ -101,7 +98,7 @@ export function SelectContent({ children, className }: { children: React.ReactNo
 
   return (
     <div className={`absolute top-full left-0 mt-1 w-full min-w-[8rem] overflow-hidden rounded-xl border border-gray-200 bg-white text-gray-950 shadow-md animate-in fade-in-80 zoom-in-95 z-50 ${className}`}>
-      <div className="p-1 max-h-[300px] overflow-y-auto custom-scrollbar">
+      <div className="p-1 max-h-[250px] overflow-y-auto custom-scrollbar">
         {children}
       </div>
     </div>
@@ -126,8 +123,9 @@ export function SelectItem({ value, children, className }: { value: string, chil
   )
 }
 
-
-// --- 2. COMPONENTI SMART ---
+export function SelectValue({ placeholder }: { placeholder?: string }) {
+  return <span className="pointer-events-none">{placeholder}</span>
+}
 
 interface ValidatedInputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   label?: string
@@ -216,12 +214,9 @@ export function ValidatedInput({
   )
 }
 
-// --- NUOVO COMPONENTE PHONE INPUT "PRO" ---
 export function PhoneInput({ name = "phoneNumber", label = "Telefono Cellulare", defaultValue = "" }) {
   const defaultCountry = COUNTRY_MAP.find(c => c.code === 'IT') || COUNTRY_MAP[0]
   const [prefix, setPrefix] = useState(defaultCountry.dial_code)
-  
-  // Calcolo bandiera corrente per il trigger (quando chiuso)
   const currentCountry = COUNTRY_MAP.find(c => c.dial_code === prefix) || defaultCountry
 
   return (
@@ -229,7 +224,6 @@ export function PhoneInput({ name = "phoneNumber", label = "Telefono Cellulare",
        {label && <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider ml-1">{label} *</label>}
        
        <div className="flex gap-2">
-          {/* SELETTORE PREFISSO */}
           <div className="w-[140px] shrink-0">
              <Select 
                 name="phonePrefix"
@@ -243,13 +237,11 @@ export function PhoneInput({ name = "phoneNumber", label = "Telefono Cellulare",
                    </div>
                 </SelectTrigger>
                 
-                {/* MODIFICA QUI: max-h-[250px] (meno alto) e w-[400px] (più largo) */}
                 <SelectContent className="max-h-[250px] w-[400px]">
                    {COUNTRY_MAP.map((c) => (
                       <SelectItem key={c.code} value={c.dial_code} className="py-2.5">
                          <div className="flex items-center gap-3 w-full">
                             <span className="text-lg flex-shrink-0">{c.flag}</span>
-                            {/* Nomi lunghi ora hanno più spazio */}
                             <span className="font-medium text-gray-700 flex-1 truncate text-left">{c.name}</span>
                             <span className="text-gray-400 font-mono text-xs">{c.dial_code}</span>
                          </div>
@@ -259,7 +251,6 @@ export function PhoneInput({ name = "phoneNumber", label = "Telefono Cellulare",
              </Select>
           </div>
 
-          {/* INPUT NUMERO */}
           <Input 
              name={name}
              required 

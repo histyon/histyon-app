@@ -3,7 +3,6 @@
 import Link from 'next/link'
 import { User, MapPin, Calendar, ArrowRight } from 'lucide-react'
 
-// Definizione del tipo paziente (allineato col DB)
 interface Patient {
   id: string
   first_name: string

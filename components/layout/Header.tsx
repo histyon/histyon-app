@@ -25,7 +25,6 @@ export async function Header({ variant, userProfile }: HeaderProps) {
             </Link>
         </div>
 
-        {/* Lato Destro */}
         <div className="flex items-center gap-6">
             {variant === 'app' && userProfile && (
                 <>
@@ -44,7 +43,6 @@ export async function Header({ variant, userProfile }: HeaderProps) {
                     </div>
                     
                     <form action={signout}>
-                        {/* TASTO ESCI: Stile "hover" attivo di default (bg-red-50) */}
                         <button className="flex items-center gap-2 text-sm font-bold text-red-600 bg-red-50 border border-red-100 hover:bg-red-100 hover:border-red-200 px-4 py-2 rounded-xl transition-all shadow-sm">
                             <LogOut className="w-4 h-4" />
                             <span className="hidden sm:inline">Esci</span>

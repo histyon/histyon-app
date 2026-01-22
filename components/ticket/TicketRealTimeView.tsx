@@ -2,27 +2,25 @@
 
 import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import { HardDrive, Download, BrainCircuit, FileText, Server, AlertTriangle, RefreshCw, ArrowRight, XCircle } from 'lucide-react'
+import { HardDrive, Download, BrainCircuit, FileText, Server, AlertTriangle, RefreshCw, XCircle, FileImage } from 'lucide-react'
 import { StatusTimeline } from '@/components/ticket/StatusTimeline'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
+import { getPresignedDownloadUrl } from '@/lib/actions/storage'
 
 export function TicketRealtimeView({ initialTicket }: { initialTicket: any }) {
   const [ticket, setTicket] = useState(initialTicket)
+  const [isDownloading, setIsDownloading] = useState(false)
   const supabase = createClient()
   const router = useRouter()
 
-  // 1. NORMALIZZAZIONE STATO (Uppercase + Trim)
   const rawStatus = ticket.status || 'UPLOADING'
   const status = rawStatus.toUpperCase().trim()
 
-  // 2. LOGICA BOOLEANA ROBUSTA
   const isError = ['ERROR', 'FAILED', 'FAIL'].includes(status)
   const isCompleted = status === 'COMPLETED'
-  // Se non è errore e non è finito, è in corso (Queued, Uploading, Processing...)
   const isProcessing = !isError && !isCompleted
 
-  // 3. REALTIME
   useEffect(() => {
     const channel = supabase.channel(`ticket-view-${ticket.id}`)
       .on(
@@ -38,26 +36,37 @@ export function TicketRealtimeView({ initialTicket }: { initialTicket: any }) {
     return () => { supabase.removeChannel(channel) }
   }, [ticket.id, supabase, router])
 
-  // 4. CLASSI BOX (Priorità assoluta a isError)
+  const handleDownload = async () => {
+    setIsDownloading(true)
+    const outputFileName = ticket.ai_metadata?.output_file || `processed-${ticket.file_name}`
+    
+    const res = await getPresignedDownloadUrl(outputFileName, 'output')
+    
+    if (res.success && res.url) {
+        window.open(res.url, '_blank')
+    } else {
+        alert("Errore nel download del file")
+    }
+    setIsDownloading(false)
+  }
+
   const getBoxClasses = () => {
-    if (isError) return 'bg-red-600 text-white shadow-xl shadow-red-500/20' // ROSSO
-    if (isCompleted) return 'bg-green-600 text-white shadow-xl shadow-green-500/20' // VERDE
-    if (status === 'PROCESSING') return 'bg-purple-600 text-white animate-pulse shadow-xl shadow-purple-500/20' // VIOLA
-    if (status === 'QUEUED') return 'bg-yellow-400 text-yellow-950 shadow-xl shadow-yellow-500/20' // GIALLO
-    return 'bg-gray-800 text-gray-300' // DEFAULT
+    if (isError) return 'bg-red-600 text-white shadow-xl shadow-red-500/20'
+    if (isCompleted) return 'bg-green-600 text-white shadow-xl shadow-green-500/20'
+    if (status === 'PROCESSING') return 'bg-purple-600 text-white animate-pulse shadow-xl shadow-purple-500/20'
+    if (status === 'QUEUED') return 'bg-yellow-400 text-yellow-950 shadow-xl shadow-yellow-500/20'
+    return 'bg-gray-800 text-gray-300'
   }
 
   return (
     <div className="space-y-8 animate-in fade-in duration-500">
       
-      {/* TIMELINE */}
       <div className="bg-white p-8 rounded-3xl border border-gray-200 shadow-sm w-full">
          <StatusTimeline status={status} />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8 items-stretch">
          
-         {/* COLONNA SX */}
          <div className="lg:col-span-1 flex flex-col gap-6">
             <div className="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm">
                 <h3 className="font-bold text-lg mb-4 flex items-center gap-2">
@@ -97,28 +106,21 @@ export function TicketRealtimeView({ initialTicket }: { initialTicket: any }) {
             </div>
          </div>
 
-         {/* COLONNA DX: BOX */}
          <div className="lg:col-span-2 h-full">
             <div className={`p-8 rounded-3xl h-full flex flex-col justify-between transition-colors duration-500 ease-in-out ${getBoxClasses()}`}>
                 
                 <div className="flex justify-between items-start mb-8">
                     <div>
                         <h3 className="font-bold text-2xl opacity-90">
-                           {isError ? 'Errore Analisi' : isCompleted ? 'Risultati AI' : 'Stato Avanzamento'}
+                           {isError ? 'Errore Analisi' : isCompleted ? 'Analisi Completata' : 'Stato Avanzamento'}
                         </h3>
                         <p className="text-sm opacity-70 mt-1 uppercase tracking-widest font-bold flex items-center gap-2">
                             {isError && <AlertTriangle className="w-4 h-4" />}
                             STATUS: {status === 'QUEUED' ? 'IN CODA' : status}
                         </p>
                     </div>
-                    {isCompleted && (
-                        <button className="flex items-center gap-2 bg-white/20 hover:bg-white/30 backdrop-blur-sm px-4 py-2 rounded-xl text-sm font-bold transition-all border border-white/10">
-                            <Download className="w-4 h-4" /> Scarica JSON
-                        </button>
-                    )}
                 </div>
 
-                {/* --- CONTENUTO ERRORE --- */}
                 {isError && (
                      <div className="flex-1 flex flex-col items-center justify-center text-center space-y-6 min-h-[300px] animate-in zoom-in duration-300">
                         <div className="w-24 h-24 rounded-full bg-white/20 flex items-center justify-center backdrop-blur-md shadow-inner border border-white/10">
@@ -130,7 +132,7 @@ export function TicketRealtimeView({ initialTicket }: { initialTicket: any }) {
                             <div className="bg-black/20 p-5 rounded-xl border border-white/10 text-left backdrop-blur-sm">
                                 <p className="text-[10px] uppercase font-bold opacity-70 mb-2 tracking-wider">Dettagli Errore:</p>
                                 <p className="font-mono text-sm leading-relaxed text-red-100">
-                                    {ticket.ai_metadata?.error || "Errore sconosciuto. Il file potrebbe essere corrotto o il sistema non è riuscito a processarlo."}
+                                    {ticket.ai_metadata?.error || "Errore generico durante l'elaborazione del file."}
                                 </p>
                             </div>
                             
@@ -138,32 +140,43 @@ export function TicketRealtimeView({ initialTicket }: { initialTicket: any }) {
                                 href={`/dashboard/patient/${ticket.patient_id}?tab=analysis&upload=true`}
                                 className="mt-8 inline-flex items-center gap-2 bg-white text-red-600 px-8 py-4 rounded-xl font-bold hover:bg-red-50 transition-all shadow-xl hover:scale-105"
                             >
-                                <RefreshCw className="w-5 h-5" /> Genera Nuovo Ticket
+                                <RefreshCw className="w-5 h-5" /> Riprova Caricamento
                             </Link>
                         </div>
                      </div>
                 )}
 
-                {/* --- CONTENUTO COMPLETATO --- */}
                 {isCompleted && (
-                    <div className="space-y-6 animate-in fade-in flex-1">
-                        <div className="grid grid-cols-2 gap-4">
-                            <div className="bg-white/10 p-5 rounded-2xl backdrop-blur-sm border border-white/5">
-                                <p className="opacity-70 text-xs uppercase font-bold">Confidence</p>
-                                <p className="text-4xl font-bold mt-2">98.5%</p>
+                    <div className="space-y-6 animate-in fade-in flex-1 flex flex-col justify-center">
+                        
+                        <div className="bg-white/10 p-6 rounded-2xl backdrop-blur-sm border border-white/10 flex items-center justify-between">
+                            <div className="flex items-center gap-4">
+                                <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center text-green-600">
+                                    <FileImage className="w-6 h-6" />
+                                </div>
+                                <div>
+                                    <p className="text-xs uppercase font-bold opacity-70">File Output Generato</p>
+                                    <p className="font-mono text-sm font-bold truncate max-w-[200px]">
+                                        {ticket.ai_metadata?.output_file || "output_analysis.tiff"}
+                                    </p>
+                                </div>
                             </div>
-                            <div className="bg-white/10 p-5 rounded-2xl backdrop-blur-sm border border-white/5">
-                                <p className="opacity-70 text-xs uppercase font-bold">Rilevamenti</p>
-                                <p className="text-4xl font-bold mt-2">3</p>
-                            </div>
+                            <button 
+                                onClick={handleDownload}
+                                disabled={isDownloading}
+                                className="flex items-center gap-2 bg-white text-green-700 px-5 py-3 rounded-xl font-bold hover:bg-green-50 transition-all shadow-lg hover:scale-105 disabled:opacity-50 disabled:scale-100"
+                            >
+                                {isDownloading ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
+                                Scarica
+                            </button>
                         </div>
-                        <div className="bg-black/20 p-5 rounded-2xl font-mono text-xs overflow-auto max-h-64 border border-white/10 shadow-inner">
-                            {JSON.stringify(ticket.ai_metadata || {}, null, 2)}
+
+                        <div className="bg-black/20 p-5 rounded-2xl font-mono text-xs h-32 border border-white/10 shadow-inner flex items-center justify-center text-white/40 italic">
+                            Nessun dato strutturato aggiuntivo disponibile al momento.
                         </div>
                     </div>
                 )}
 
-                {/* --- CONTENUTO PROCESSING --- */}
                 {isProcessing && (
                     <div className="flex-1 flex flex-col items-center justify-center text-center space-y-6 min-h-[300px]">
                         <div className="w-24 h-24 rounded-full bg-white/20 flex items-center justify-center backdrop-blur-md shadow-inner border border-white/10">
@@ -179,8 +192,8 @@ export function TicketRealtimeView({ initialTicket }: { initialTicket: any }) {
                             </p>
                             <p className="opacity-80 text-base leading-relaxed font-medium">
                                 {status === 'QUEUED' 
-                                    ? 'Il file è stato caricato. Attendiamo che l\'AI si liberi per iniziare.' 
-                                    : 'Stiamo elaborando il tessuto. L\'operazione richiede circa 1-2 minuti.'}
+                                    ? 'Il file è al sicuro. Aspettiamo che il motore AI lo prenda in carico.' 
+                                    : 'Sto analizzando i tessuti. Ci vorrà qualche minuto, non chiudere.'}
                             </p>
                         </div>
                     </div>

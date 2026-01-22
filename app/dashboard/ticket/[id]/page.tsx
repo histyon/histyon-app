@@ -19,9 +19,7 @@ export default async function TicketPage(props: {
   if (!ticket) return notFound()
 
   return (
-    // PADDING ESATTO HEADER: max-w-7xl + px-6
     <div className="layout-container py-8 space-y-8">      
-      {/* HEADER NAVIGAZIONE */}
       <div className="flex items-center gap-4">
         <Link 
             href={`/dashboard/patient/${ticket.patient_id}?tab=analysis`}
@@ -39,7 +37,6 @@ export default async function TicketPage(props: {
         </div>
       </div>
 
-      {/* COMPONENTE CLIENT UNICO */}
       <TicketRealtimeView initialTicket={ticket} />
 
     </div>

@@ -16,7 +16,6 @@ const PatientSchema = z.object({
   city: z.string().optional(),
   province: z.string().optional(),
   postalCode: z.string().optional(),
-  // NUOVI CAMPI OBBLIGATORI
   email: z.string().email("Email non valida"),
   phoneNumber: z.string().min(5, "Numero troppo corto"),
 })
@@ -24,10 +23,11 @@ const PatientSchema = z.object({
 export async function addPatient(prevState: any, formData: FormData) {
   const supabase = await createClient()
   
+  // controllo di sicurezza: chi sta facendo questa richiesta?
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return { error: 'Non autorizzato' }
 
-  // COSTRUZIONE DATA
+  // assemblo la data di nascita dai campi separati
   const day = formData.get('dob_day')
   const month = formData.get('dob_month')
   const year = formData.get('dob_year')
@@ -45,15 +45,15 @@ export async function addPatient(prevState: any, formData: FormData) {
     city: formData.get('city'),
     province: formData.get('province'),
     postalCode: formData.get('postalCode'),
-    // NUOVI
     email: formData.get('email'),
     phoneNumber: formData.get('phoneNumber'),
   }
 
+  // valido tutto con zod per essere sicuro che i dati siano ok
   const validated = PatientSchema.safeParse(rawData)
   if (!validated.success) return { error: validated.error.issues[0].message }
 
-  // Check duplicati
+  // controllo se ho già questo paziente nel db per evitare duplicati inutili
   const { data: existing } = await supabase
     .from('patients')
     .select('id')
@@ -63,6 +63,7 @@ export async function addPatient(prevState: any, formData: FormData) {
 
   if (existing) return { error: 'Paziente già presente in archivio.' }
 
+  // inserisco finalmente il paziente collegandolo al dottore loggato
   const { error } = await supabase.from('patients').insert({
     doctor_id: user.id,
     first_name: validated.data.firstName,
@@ -82,6 +83,7 @@ export async function addPatient(prevState: any, formData: FormData) {
 
   if (error) return { error: error.message }
 
+  // ricarico la dashboard così il nuovo paziente appare subito nella lista
   revalidatePath('/dashboard')
   return { success: true }
 }

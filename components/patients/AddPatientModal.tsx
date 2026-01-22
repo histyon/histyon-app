@@ -54,7 +54,6 @@ export function AddPatientModal() {
           <button onClick={() => setIsOpen(false)} className="p-2 bg-gray-100 hover:bg-gray-200 rounded-full transition-colors"><X className="w-5 h-5" /></button>
         </div>
 
-        {/* ERROR BOX */}
         {error && (
             <div className="mb-6 bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-xl text-sm flex items-center gap-3 shadow-sm animate-in fade-in slide-in-from-top-2">
               <AlertCircle className="w-5 h-5 flex-shrink-0" />
@@ -96,7 +95,6 @@ export function AddPatientModal() {
 
           <hr className="border-gray-100" />
 
-          {/* NUOVA SEZIONE CONTATTI */}
           <div className="space-y-4">
              <h4 className="text-xs font-bold text-gray-400 uppercase tracking-wider flex items-center gap-2">
                 <Phone className="w-4 h-4" /> Contatti

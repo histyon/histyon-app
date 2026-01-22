@@ -17,15 +17,12 @@ export async function getPresignedUploadUrl(
 ) {
   const supabase = await createClient()
   
-  // se non sei loggato non carichi nulla
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return { error: 'Non autorizzato' }
 
-  // genero l'id subito così lo posso usare sia nel db che nel nome file
   const ticketId = uuidv4()
 
   try {
-    // creo un nome file univoco con la data per evitare sovrascritture
     const date = new Date()
     const dateStr = date.toISOString().split('T')[0].replace(/-/g, '')
     const fileExt = originalName.split('.').pop()
@@ -34,7 +31,7 @@ export async function getPresignedUploadUrl(
     // percorso nel bucket: id_dottore/id_paziente/nome_file
     const filePath = `${user.id}/${patientId}/${customFileName}`
 
-    // creo il ticket nel db con stato 'uploading', così intanto esiste
+    // creo il ticket nel db
     const { error: dbError } = await supabase
       .from('tickets')
       .insert({
@@ -50,9 +47,9 @@ export async function getPresignedUploadUrl(
 
     if (dbError) throw new Error(`DB Error: ${dbError.message}`)
 
-    // chiedo a cloudflare un url temporaneo per permettere al frontend di caricare il file
+    // genero l'url firmato per l'upload
     const command = new PutObjectCommand({
-      Bucket: process.env.R2_BUCKET_NAME,
+      Bucket: process.env.R2_INPUT_BUCKET_NAME, // <--- Usa il bucket Input
       Key: filePath,
       ContentType: fileType,
       Metadata: { originalName }
@@ -65,7 +62,6 @@ export async function getPresignedUploadUrl(
   } catch (error: any) {
     console.error('Upload Error:', error)
 
-    // se qualcosa va storto, segno subito il ticket come fallito nel db
     await supabase
         .from('tickets')
         .update({ 
@@ -78,7 +74,6 @@ export async function getPresignedUploadUrl(
   }
 }
 
-// conferma che il file è su r2 e mette il ticket in coda per l'ai
 export async function confirmUpload(ticketId: string) {
     const supabase = await createClient()
     
@@ -93,17 +88,15 @@ export async function confirmUpload(ticketId: string) {
     return { success: true }
 }
 
-// genera un url temporaneo per scaricare i file, sia input che output
 export async function getPresignedDownloadUrl(filePath: string, bucketType: 'input' | 'output' = 'input') {
   const supabase = await createClient()
   
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return { error: 'Non autorizzato' }
 
-  // scelgo il bucket giusto in base a cosa mi hai chiesto
   const bucket = bucketType === 'output' 
     ? process.env.R2_OUTPUT_BUCKET_NAME 
-    : process.env.R2_INPUT_BUCKET_NAME
+    : process.env.R2_INPUT_BUCKET_NAME 
 
   try {
     const command = new GetObjectCommand({
@@ -111,7 +104,6 @@ export async function getPresignedDownloadUrl(filePath: string, bucketType: 'inp
       Key: filePath,
     })
 
-    // l'url scade dopo 15 minuti per sicurezza
     const signedUrl = await getSignedUrl(r2Client, command, { expiresIn: 900 }) 
 
     return { success: true, url: signedUrl }

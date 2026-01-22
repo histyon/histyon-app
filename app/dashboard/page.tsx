@@ -60,7 +60,11 @@ export default async function DashboardPage(props: {
            <div className="flex justify-between items-center">
               <h2 className="text-xl font-bold">Cronologia Globale Analisi</h2>
            </div>
-           <TicketList tickets={allTickets || []} showPatientName={true} />
+           <TicketList 
+                tickets={allTickets || []} 
+                showPatientName={true} 
+                doctorId={user.id} 
+           />
         </div>
       )}
     </div>

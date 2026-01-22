@@ -81,7 +81,11 @@ export default async function PatientDetailPage(props: {
            <InlineFileUploader patientId={patient.id} />
            <div className="mt-8">
               <h3 className="font-bold text-gray-900 text-lg mb-4">Storico Caricamenti</h3>
-              <TicketList tickets={patientTickets || []} showPatientName={false} />
+              <TicketList 
+                tickets={patientTickets || []} 
+                showPatientName={false} 
+                patientId={patient.id}
+              />
            </div>
         </div>
       )}

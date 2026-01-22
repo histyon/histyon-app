@@ -2,14 +2,60 @@
 
 import { useRouter } from 'next/navigation'
 import { Clock, CheckCircle2, AlertTriangle, Loader2, FileText } from 'lucide-react'
+import { useEffect, useState } from 'react'
+import { createClient } from '@/lib/supabase/client'
 
 interface TicketListProps {
   tickets: any[]
   showPatientName?: boolean
+  doctorId?: string 
+  patientId?: string
 }
 
-export function TicketList({ tickets, showPatientName = false }: TicketListProps) {
+export function TicketList({ tickets: initialTickets, showPatientName = false, doctorId, patientId }: TicketListProps) {
   const router = useRouter()
+  const [tickets, setTickets] = useState(initialTickets)
+  const supabase = createClient()
+
+  useEffect(() => {
+    setTickets(initialTickets)
+  }, [initialTickets])
+
+  useEffect(() => {
+    let filter = ''
+    if (patientId) {
+        filter = `patient_id=eq.${patientId}`
+    } else if (doctorId) {
+        filter = `doctor_id=eq.${doctorId}`
+    } else {
+        return
+    }
+
+    const channel = supabase.channel(`realtime-list-${patientId || doctorId}`)
+      .on(
+        'postgres_changes',
+        { 
+          event: '*',
+          schema: 'public', 
+          table: 'tickets',
+          filter: filter 
+        },
+        (payload) => {
+           console.log('Realtime update:', payload)
+           
+           if (payload.eventType === 'INSERT') {
+              router.refresh()
+           } else if (payload.eventType === 'UPDATE') {
+              setTickets((current) => 
+                current.map((t) => t.id === payload.new.id ? { ...t, ...payload.new } : t)
+              )
+           }
+        }
+      )
+      .subscribe()
+
+    return () => { supabase.removeChannel(channel) }
+  }, [supabase, router, patientId, doctorId])
 
   if (!tickets || tickets.length === 0) {
     return (
@@ -20,7 +66,7 @@ export function TicketList({ tickets, showPatientName = false }: TicketListProps
   }
 
   return (
-    <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden font-sans">
+    <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden font-sans animate-in fade-in">
       <table className="w-full text-left text-sm">
         <thead className="bg-gray-50 border-b border-gray-100">
           <tr>
@@ -35,7 +81,6 @@ export function TicketList({ tickets, showPatientName = false }: TicketListProps
           {tickets.map((t) => (
             <tr 
               key={t.id} 
-              // NAVIGAZIONE AL DETTAGLIO TICKET
               onClick={() => router.push(`/dashboard/ticket/${t.id}`)}
               className="hover:bg-gray-50 transition-colors cursor-pointer group"
             >
@@ -45,7 +90,7 @@ export function TicketList({ tickets, showPatientName = false }: TicketListProps
               
               {showPatientName && (
                 <td className="px-6 py-4 font-bold text-gray-900">
-                  {t.patients?.first_name} {t.patients?.last_name}
+                  {Array.isArray(t.patients) ? t.patients[0]?.first_name : t.patients?.first_name} {Array.isArray(t.patients) ? t.patients[0]?.last_name : t.patients?.last_name}
                 </td>
               )}
               

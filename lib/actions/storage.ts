@@ -7,7 +7,6 @@ import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
 import { v4 as uuidv4 } from 'uuid'
 import { revalidatePath } from 'next/cache'
 
-// questa funzione genera l'url per l'upload e crea il ticket iniziale
 export async function getPresignedUploadUrl(
   originalName: string, 
   fileType: string, 
@@ -23,15 +22,11 @@ export async function getPresignedUploadUrl(
   const ticketId = uuidv4()
 
   try {
-    const date = new Date()
-    const dateStr = date.toISOString().split('T')[0].replace(/-/g, '')
     const fileExt = originalName.split('.').pop()
-    const customFileName = `scan-${ticketId.slice(0, 8)}-${dateStr}.${fileExt}`
+    const customFileName = `scaninput-${ticketId}.${fileExt}`
     
-    // percorso nel bucket: id_dottore/id_paziente/nome_file
     const filePath = `${user.id}/${patientId}/${customFileName}`
 
-    // creo il ticket nel db
     const { error: dbError } = await supabase
       .from('tickets')
       .insert({
@@ -47,9 +42,8 @@ export async function getPresignedUploadUrl(
 
     if (dbError) throw new Error(`DB Error: ${dbError.message}`)
 
-    // genero l'url firmato per l'upload
     const command = new PutObjectCommand({
-      Bucket: process.env.R2_INPUT_BUCKET_NAME, // <--- Usa il bucket Input
+      Bucket: process.env.R2_INPUT_BUCKET_NAME,
       Key: filePath,
       ContentType: fileType,
       Metadata: { originalName }
@@ -61,47 +55,31 @@ export async function getPresignedUploadUrl(
 
   } catch (error: any) {
     console.error('Upload Error:', error)
-
-    await supabase
-        .from('tickets')
-        .update({ 
-            status: 'ERROR',
-            ai_metadata: { error: error.message || 'Errore di configurazione sistema' }
-        })
-        .eq('id', ticketId)
-
+    await supabase.from('tickets').update({ status: 'ERROR', ai_metadata: { error: error.message } }).eq('id', ticketId)
     return { error: error.message }
   }
 }
 
 export async function confirmUpload(ticketId: string) {
     const supabase = await createClient()
-    
-    const { error } = await supabase
-        .from('tickets')
-        .update({ status: 'QUEUED' })
-        .eq('id', ticketId)
-
+    const { error } = await supabase.from('tickets').update({ status: 'QUEUED' }).eq('id', ticketId)
     if (error) return { error: error.message }
-    
     revalidatePath('/dashboard')
     return { success: true }
 }
 
 export async function getPresignedDownloadUrl(filePath: string, bucketType: 'input' | 'output' = 'input') {
   const supabase = await createClient()
-  
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return { error: 'Non autorizzato' }
 
-  const bucket = bucketType === 'output' 
-    ? process.env.R2_OUTPUT_BUCKET_NAME 
-    : process.env.R2_INPUT_BUCKET_NAME 
+  const bucket = bucketType === 'output' ? process.env.R2_OUTPUT_BUCKET_NAME : process.env.R2_INPUT_BUCKET_NAME 
 
   try {
     const command = new GetObjectCommand({
       Bucket: bucket,
       Key: filePath,
+      ResponseContentDisposition: 'attachment',
     })
 
     const signedUrl = await getSignedUrl(r2Client, command, { expiresIn: 900 }) 
@@ -109,7 +87,6 @@ export async function getPresignedDownloadUrl(filePath: string, bucketType: 'inp
     return { success: true, url: signedUrl }
 
   } catch (error: any) {
-    console.error('Download URL Error:', error)
     return { error: 'Impossibile recuperare il file' }
   }
 }

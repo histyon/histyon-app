@@ -4,9 +4,6 @@ import React, { useState, useEffect, useRef, createContext, useContext } from 'r
 import { Eye, EyeOff, Loader2, AlertCircle, CheckCircle2, ChevronDown, Check } from 'lucide-react'
 import { COUNTRY_MAP, ITALIAN_PROVINCES } from '@/lib/constants'
 
-// --- 1. COMPONENTI BASE UI (Input, Button, Select) ---
-
-// INPUT BASE
 export interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {}
 
 export const Input = React.forwardRef<HTMLInputElement, InputProps>(
@@ -23,7 +20,6 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
 )
 Input.displayName = "Input"
 
-// BUTTON BASE
 export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {}
 
 export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
@@ -39,7 +35,6 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
 )
 Button.displayName = "Button"
 
-// SELECT FAMILY (Custom implementation leggera senza Radix per velocità)
 interface SelectContextType {
   value: string
   onChange: (value: string) => void

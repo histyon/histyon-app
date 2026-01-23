@@ -18,3 +18,25 @@ export interface Patient {
   place_of_birth?: string;
   created_at: string;
 }
+
+export interface Ticket {
+  id: string;
+  patient_id: string;
+  status: 'uploaded' | 'processing' | 'completed' | 'error';
+  image_url: string; 
+  created_at: string;
+  output_dzi_url?: string;   
+  project_file_url?: string; 
+  ai_results?: {
+    summary?: {
+      percentuale_tessuto_malato?: number;
+      area_totale?: number;
+      counts?: {
+        glomeruli?: number;
+        glomeruli_sclerotici?: number;
+        tubuli_prossimali?: number;
+        tubuli_distali?: number;
+      };
+    };
+  };
+}

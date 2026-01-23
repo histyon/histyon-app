@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation'
 import { ArrowLeft } from 'lucide-react'
 import Link from 'next/link'
 import { TicketRealtimeView } from '@/components/ticket/TicketRealTimeView'
+import TicketResult from '@/components/ticket/TicketResult'
 
 export default async function TicketPage(props: {
   params: Promise<{ id: string }>
@@ -38,7 +39,7 @@ export default async function TicketPage(props: {
       </div>
 
       <TicketRealtimeView initialTicket={ticket} />
-
+      <TicketResult ticket={ticket} />
     </div>
   )
 }

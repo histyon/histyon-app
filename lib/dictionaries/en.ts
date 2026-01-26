@@ -73,7 +73,9 @@ export const en = {
       medicalProfile: "Medical Profile",
       btn: "Sign In",
       forgotPassword: "Forgot password?",
-      successRedirect: "Account verified. Please sign in."
+      successRedirect: "Account verified. Please sign in.",
+      emailConfirmed: "Email successfully confirmed. You can now login.",
+      linkInvalid: "Invalid or expired link."
     },
     forgotPassword: {
       title: "Password Recovery",
@@ -83,9 +85,7 @@ export const en = {
       backToLogin: "Back to Login",
       successTitle: "Email Sent",
       successDesc: "If the address is in our system, you will receive reset instructions shortly.",
-      errorGeneric: "An error occurred. Please try again later.",
-      emailConfirmed: "Email successfully confirmed. You can now login.",
-      linkInvalid: "Invalid or expired link."
+      errorGeneric: "An error occurred. Please try again later."
     },
     updatePassword: {
       title: "New Password",

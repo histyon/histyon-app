@@ -74,10 +74,8 @@ export const it = {
       btn: "Accedi",
       forgotPassword: "Password dimenticata?",
       successRedirect: "Account verificato. Effettua l'accesso.",
-      // --- NUOVE RIGHE AGGIUNTE ---
       emailConfirmed: "Email confermata con successo. Ora puoi accedere.",
       linkInvalid: "Link non valido o scaduto."
-      // ----------------------------
     },
     forgotPassword: {
       title: "Recupero Password",

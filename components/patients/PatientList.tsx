@@ -13,15 +13,22 @@ interface Patient {
   date_of_birth: string
 }
 
-export function PatientList({ patients }: { patients: Patient[] }) {
+interface PatientListProps {
+  patients: Patient[]
+  dict: any
+}
+
+export function PatientList({ patients, dict }: PatientListProps) {
+  const t = dict.dashboard.patients;
+
   if (!patients || patients.length === 0) {
     return (
       <div className="text-center py-12 border border-dashed border-gray-200 rounded-2xl bg-gray-50">
         <div className="bg-white p-3 rounded-full inline-flex mb-3 shadow-sm">
            <User className="w-6 h-6 text-gray-400" />
         </div>
-        <p className="text-gray-500 font-medium">Nessun paziente registrato.</p>
-        <p className="text-sm text-gray-400">Inizia aggiungendone uno.</p>
+        <p className="text-gray-500 font-medium">{t.empty.title}</p>
+        <p className="text-sm text-gray-400">{t.empty.subtitle}</p>
       </div>
     )
   }
@@ -51,7 +58,7 @@ export function PatientList({ patients }: { patients: Patient[] }) {
             <div className="space-y-1 mt-4">
                <div className="flex items-center gap-2 text-xs text-gray-500">
                  <Calendar className="w-3.5 h-3.5" />
-                 {new Date(patient.date_of_birth).toLocaleDateString('it-IT')}
+                 {new Date(patient.date_of_birth).toLocaleDateString(dict === 'en' ? 'en-US' : 'it-IT')}
                </div>
                <div className="flex items-center gap-2 text-xs text-gray-500">
                  <MapPin className="w-3.5 h-3.5" />
@@ -61,7 +68,7 @@ export function PatientList({ patients }: { patients: Patient[] }) {
           </div>
 
           <div className="mt-4 pt-4 border-t border-gray-50 flex justify-between items-center">
-             <span className="text-xs font-bold text-gray-400 group-hover:text-black transition-colors">Apri Cartella</span>
+             <span className="text-xs font-bold text-gray-400 group-hover:text-black transition-colors">{t.card.openFolder}</span>
              <ArrowRight className="w-4 h-4 text-gray-300 group-hover:text-black -translate-x-2 group-hover:translate-x-0 transition-all" />
           </div>
         </Link>

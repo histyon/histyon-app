@@ -4,6 +4,8 @@ import { ArrowLeft, FileText, Activity } from 'lucide-react'
 import Link from 'next/link'
 import { TicketList } from '@/components/dashboard/TicketList'
 import { InlineFileUploader } from '@/components/dashboard/InlineFileUploader'
+// FIX: Aggiunto getLocale
+import { getDictionary, getLocale } from '@/lib/dictionary'
 
 export default async function PatientDetailPage(props: {
   params: Promise<{ id: string }>
@@ -11,6 +13,11 @@ export default async function PatientDetailPage(props: {
 }) {
   const params = await props.params
   const searchParams = await props.searchParams
+  const dict = await getDictionary();
+  // FIX: Recupero la lingua come stringa per i confronti
+  const lang = await getLocale(); 
+  
+  const t = dict.dashboard;
 
   const { id } = params
   const tab = typeof searchParams.tab === 'string' ? searchParams.tab : 'analysis' 
@@ -64,27 +71,28 @@ export default async function PatientDetailPage(props: {
              scroll={false}
              className={`pb-4 px-1 border-b-2 font-medium text-sm flex items-center gap-2 transition-all ${tab === 'analysis' ? 'border-black text-black' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}`}
           >
-             <Activity className="w-4 h-4" /> Cronologia Analisi
+             <Activity className="w-4 h-4" /> {t.titles.uploadHistory}
           </Link>
           <Link 
              href="?tab=profile" 
              scroll={false}
              className={`pb-4 px-1 border-b-2 font-medium text-sm flex items-center gap-2 transition-all ${tab === 'profile' ? 'border-black text-black' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}`}
           >
-             <FileText className="w-4 h-4" /> Dati Anagrafici
+             <FileText className="w-4 h-4" /> {t.tabs.profile}
           </Link>
         </nav>
       </div>
 
       {tab === 'analysis' && (
         <div className="animate-in fade-in slide-in-from-bottom-2 duration-300 w-full">
-           <InlineFileUploader patientId={patient.id} />
+           <InlineFileUploader patientId={patient.id} dict={dict} />
            <div className="mt-8">
-              <h3 className="font-bold text-gray-900 text-lg mb-4">Storico Caricamenti</h3>
+              <h3 className="font-bold text-gray-900 text-lg mb-4">{t.titles.uploadHistory}</h3>
               <TicketList 
                 tickets={patientTickets || []} 
                 showPatientName={false} 
                 patientId={patient.id}
+                dict={dict}
               />
            </div>
         </div>
@@ -94,29 +102,30 @@ export default async function PatientDetailPage(props: {
         <div className="bg-white p-8 rounded-2xl border border-gray-200 shadow-sm animate-in fade-in slide-in-from-bottom-2 duration-300 w-full">
            <h3 className="font-bold text-gray-900 text-lg mb-6 flex items-center gap-2">
              <div className="w-1 h-6 bg-black rounded-full"></div>
-             Cartella Personale
+             {t.titles.patientFolder}
            </h3>
            
            <div className="grid grid-cols-1 md:grid-cols-2 gap-y-8 gap-x-12 text-sm">
              <div className="space-y-1">
-               <label className="block text-gray-400 text-xs uppercase font-bold tracking-wider">Data di Nascita</label>
+               <label className="block text-gray-400 text-xs uppercase font-bold tracking-wider">{t.profile.dob}</label>
                <p className="font-medium text-gray-900 text-base">
-                 {new Date(patient.date_of_birth).toLocaleDateString('it-IT', { day: 'numeric', month: 'long', year: 'numeric' })}
+                 {/* FIX: Uso 'lang' invece di 'dict' per il confronto stringa */}
+                 {new Date(patient.date_of_birth).toLocaleDateString(lang === 'en' ? 'en-US' : 'it-IT', { day: 'numeric', month: 'long', year: 'numeric' })}
                </p>
              </div>
              <div className="space-y-1">
-               <label className="block text-gray-400 text-xs uppercase font-bold tracking-wider">Luogo di Nascita</label>
+               <label className="block text-gray-400 text-xs uppercase font-bold tracking-wider">{t.profile.birthPlace}</label>
                <p className="font-medium text-gray-900 text-base">
                  {patient.place_of_birth}, {patient.country}
                </p>
              </div>
              <div className="space-y-1">
-               <label className="block text-gray-400 text-xs uppercase font-bold tracking-wider">Residenza</label>
+               <label className="block text-gray-400 text-xs uppercase font-bold tracking-wider">{t.profile.residence}</label>
                <p className="font-medium text-gray-900 text-base">{patient.address}</p>
                <p className="text-gray-500">{patient.postal_code} {patient.city} ({patient.region || patient.province})</p>
              </div>
              <div className="space-y-1">
-                <label className="block text-gray-400 text-xs uppercase font-bold tracking-wider">Contatti</label>
+                <label className="block text-gray-400 text-xs uppercase font-bold tracking-wider">{t.profile.contacts}</label>
                 <p className="font-medium text-gray-900 text-base flex items-center gap-2">
                     <span className="text-gray-400">@</span> {patient.email || '-'}
                 </p>

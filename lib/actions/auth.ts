@@ -4,6 +4,7 @@ import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { PasswordSchema } from '@/lib/schemas'
+import { dictionary } from '@/lib/dictionary'
 
 // stabilisce lo stato di una registrazione, iniziale, con successo o errore, in caso di errore, ad esempio, 
 // restituisce i dati ricevuti cosi come sono, così che l'utente non debba riscriverli
@@ -25,7 +26,7 @@ export async function login(formData: FormData) {
   // tenta il sign in con le credenziali ricevute
   const { error } = await supabase.auth.signInWithPassword(data)
   // in caso di errore ti riporta al login con url di errore
-  if (error) redirect(`/auth/login?error=${encodeURIComponent('Credenziali non valide')}`)
+  if (error) redirect(`/auth/login?error=${encodeURIComponent(dictionary.validation.credentialsInvalid)}`)
 
   revalidatePath('/', 'layout')
   redirect('/dashboard')
@@ -86,7 +87,7 @@ export async function signup(prevState: SignupState, formData: FormData): Promis
   if (authError) {
     let fieldErrors: any = {}
     if (authError.message.includes('already registered') || authError.status === 422) {
-        fieldErrors.email = "Questa email è già registrata."
+        fieldErrors.email = dictionary.validation.alreadyRegistered
     }
     return { status: 'error', message: authError.message, errors: fieldErrors, inputs: rawData }
   }
@@ -116,7 +117,7 @@ export async function signup(prevState: SignupState, formData: FormData): Promis
     
     // in caso contrario, ritorniamo errore
     if (profileError) {
-        return { status: 'error', message: "Errore salvataggio profilo: " + profileError.message, inputs: rawData }
+        return { status: 'error', message: dictionary.validation.profileError + profileError.message, inputs: rawData }
     }
   }
 

@@ -1,15 +1,17 @@
 import { Check, UploadCloud, Server, BrainCircuit, FileCheck, XCircle } from 'lucide-react'
 
-export function StatusTimeline({ status: rawStatus }: { status: string }) {
+export function StatusTimeline({ status: rawStatus, dict }: { status: string, dict: any }) {
   const status = rawStatus?.toUpperCase()?.trim() || 'UPLOADING'
-  
   const isError = ['ERROR', 'FAILED', 'FAIL'].includes(status)
+  
+  const t = dict.dashboard.tickets.steps;
+  const tStatus = dict.dashboard.tickets.status;
 
   const STEPS = [
-    { id: 'UPLOADING', label: 'Caricamento', icon: UploadCloud, color: 'gray' },
-    { id: 'QUEUED', label: 'In Coda Cloud', icon: Server, color: 'yellow' },
-    { id: 'PROCESSING', label: 'Analisi AI', icon: BrainCircuit, color: 'purple' },
-    { id: 'COMPLETED', label: 'Completato', icon: FileCheck, color: 'green' },
+    { id: 'UPLOADING', label: t.uploading, icon: UploadCloud, color: 'gray' },
+    { id: 'QUEUED', label: t.queued, icon: Server, color: 'yellow' },
+    { id: 'PROCESSING', label: t.processing, icon: BrainCircuit, color: 'purple' },
+    { id: 'COMPLETED', label: t.completed, icon: FileCheck, color: 'green' },
   ]
 
   const currentIndex = isError ? 0 : STEPS.findIndex(s => s.id === status)
@@ -61,7 +63,7 @@ export function StatusTimeline({ status: rawStatus }: { status: string }) {
         {isError && (
              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-red-600 text-white px-6 py-3 rounded-2xl shadow-xl shadow-red-500/20 z-20 flex items-center gap-3 animate-in zoom-in slide-in-from-bottom-2 duration-300">
                 <XCircle className="w-6 h-6" />
-                <span className="font-bold text-sm tracking-wide">ANALISI FALLITA</span>
+                <span className="font-bold text-sm tracking-wide">{tStatus.failedAnalysis}</span>
              </div>
         )}
 

@@ -3,10 +3,14 @@ import Link from 'next/link'
 import { AuthSidebar } from '@/components/auth/AuthSidebar'
 import { AlertCircle, CheckCircle2, UserPlus, ArrowRight } from 'lucide-react'
 import { ValidatedInput } from '@/components/ui/FormElements'
+import { getDictionary } from '@/lib/dictionary'
 import { Metadata } from 'next'
 
-export const metadata: Metadata = {
-  title: 'Accedi',
+export async function generateMetadata(): Promise<Metadata> {
+  const dict = await getDictionary()
+  return {
+    title: dict.auth.login.title,
+  }
 }
 
 export default async function LoginPage(props: {
@@ -15,17 +19,22 @@ export default async function LoginPage(props: {
   const searchParams = await props.searchParams
   const error = typeof searchParams.error === 'string' ? searchParams.error : null
   const success = typeof searchParams.success === 'string' ? searchParams.success : null
+  
+  const dict = await getDictionary();
+  const t = dict.auth.login;
+  const tf = dict.auth.form;
 
   return (
     <div className="min-h-screen flex w-full bg-white font-sans text-gray-900">
       
-      <AuthSidebar />
+      {/* Passiamo il dizionario alla Sidebar */}
+      <AuthSidebar dict={dict} />
 
       <div className="flex-1 flex flex-col items-center justify-center p-6 relative">
         <div className="max-w-md w-full">
           <div className="mb-8">
-            <h1 className="text-3xl font-bold mb-2">Accesso Console</h1>
-            <p className="text-gray-500">Inserisci le credenziali istituzionali.</p>
+            <h1 className="text-3xl font-bold mb-2">{t.heading}</h1>
+            <p className="text-gray-500">{t.subheading}</p>
           </div>
 
           {error && (
@@ -46,31 +55,31 @@ export default async function LoginPage(props: {
             <ValidatedInput 
                 name="email" 
                 type="email" 
-                label="Email" 
+                label={tf.labels.emailSimple}
                 required 
             />
             <ValidatedInput 
                 name="password" 
                 type="password" 
-                label="Password" 
+                label={tf.labels.passwordSimple}
                 required 
             />
             
             <button formAction={login} className="w-full bg-black text-white py-4 rounded-xl font-bold hover:bg-gray-800 transition-all shadow-lg mt-4">
-              Accedi
+              {t.btn}
             </button>
           </form>
 
           <div className="mt-10 pt-10 border-t border-gray-100">
-            <p className="text-sm text-gray-500 mb-4">Non hai le credenziali?</p>
+            <p className="text-sm text-gray-500 mb-4">{t.noCredentials}</p>
             <Link href="/auth/register" className="group flex items-center justify-between p-4 rounded-xl border border-gray-200 hover:border-black hover:bg-gray-50 transition-all cursor-pointer">
                 <div className="flex items-center gap-3">
                     <div className="bg-gray-100 p-2 rounded-lg group-hover:bg-white transition-colors">
                         <UserPlus className="w-5 h-5 text-gray-700" />
                     </div>
                     <div className="text-left">
-                        <p className="font-bold text-gray-900 text-sm">Richiedi Accesso</p>
-                        <p className="text-xs text-gray-500">Profilo medico SSN</p>
+                        <p className="font-bold text-gray-900 text-sm">{t.requestAccess}</p>
+                        <p className="text-xs text-gray-500">{t.medicalProfile}</p>
                     </div>
                 </div>
                 <ArrowRight className="w-5 h-5 text-gray-400 group-hover:text-black transition-colors" />

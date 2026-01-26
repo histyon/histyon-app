@@ -10,12 +10,14 @@ interface TicketListProps {
   showPatientName?: boolean
   doctorId?: string 
   patientId?: string
+  dict: any
 }
 
-export function TicketList({ tickets: initialTickets, showPatientName = false, doctorId, patientId }: TicketListProps) {
+export function TicketList({ tickets: initialTickets, showPatientName = false, doctorId, patientId, dict }: TicketListProps) {
   const router = useRouter()
   const [tickets, setTickets] = useState(initialTickets)
   const supabase = createClient()
+  const t = dict.dashboard.tickets;
 
   useEffect(() => {
     setTickets(initialTickets)
@@ -60,7 +62,7 @@ export function TicketList({ tickets: initialTickets, showPatientName = false, d
   if (!tickets || tickets.length === 0) {
     return (
       <div className="text-center py-12 bg-white rounded-2xl border border-dashed border-gray-200">
-        <p className="text-gray-400 text-sm">Nessuna analisi presente in archivio.</p>
+        <p className="text-gray-400 text-sm">{t.empty}</p>
       </div>
     )
   }
@@ -70,11 +72,11 @@ export function TicketList({ tickets: initialTickets, showPatientName = false, d
       <table className="w-full text-left text-sm">
         <thead className="bg-gray-50 border-b border-gray-100">
           <tr>
-            <th className="px-6 py-4 font-bold text-gray-500 uppercase text-xs tracking-wider">Ticket ID</th>
-            {showPatientName && <th className="px-6 py-4 font-bold text-gray-500 uppercase text-xs tracking-wider">Paziente</th>}
-            <th className="px-6 py-4 font-bold text-gray-500 uppercase text-xs tracking-wider">File</th>
-            <th className="px-6 py-4 font-bold text-gray-500 uppercase text-xs tracking-wider">Data Caricamento</th>
-            <th className="px-6 py-4 font-bold text-gray-500 uppercase text-xs tracking-wider text-right">Stato</th>
+            <th className="px-6 py-4 font-bold text-gray-500 uppercase text-xs tracking-wider">{t.table.id}</th>
+            {showPatientName && <th className="px-6 py-4 font-bold text-gray-500 uppercase text-xs tracking-wider">{t.table.patient}</th>}
+            <th className="px-6 py-4 font-bold text-gray-500 uppercase text-xs tracking-wider">{t.table.file}</th>
+            <th className="px-6 py-4 font-bold text-gray-500 uppercase text-xs tracking-wider">{t.table.date}</th>
+            <th className="px-6 py-4 font-bold text-gray-500 uppercase text-xs tracking-wider text-right">{t.table.status}</th>
           </tr>
         </thead>
         <tbody className="divide-y divide-gray-100">
@@ -109,7 +111,7 @@ export function TicketList({ tickets: initialTickets, showPatientName = false, d
               </td>
               
               <td className="px-6 py-4 text-right">
-                <StatusBadge status={t.status} />
+                <StatusBadge status={t.status} dict={dict} />
               </td>
             </tr>
           ))}
@@ -119,18 +121,19 @@ export function TicketList({ tickets: initialTickets, showPatientName = false, d
   )
 }
 
-function StatusBadge({ status }: { status: string }) {
+function StatusBadge({ status, dict }: { status: string, dict: any }) {
+  const t = dict.dashboard.tickets.status;
   switch (status) {
     case 'COMPLETED':
-      return <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-green-50 text-green-700 border border-green-100"><CheckCircle2 className="w-3.5 h-3.5"/> Completato</span>
+      return <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-green-50 text-green-700 border border-green-100"><CheckCircle2 className="w-3.5 h-3.5"/> {t.completed}</span>
     case 'PROCESSING':
-      return <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-blue-50 text-blue-700 border border-blue-100 animate-pulse"><Loader2 className="w-3.5 h-3.5 animate-spin"/> In Elaborazione</span>
+      return <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-blue-50 text-blue-700 border border-blue-100 animate-pulse"><Loader2 className="w-3.5 h-3.5 animate-spin"/> {t.processing}</span>
     case 'QUEUED':
-      return <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-yellow-50 text-yellow-700 border border-yellow-100"><Clock className="w-3.5 h-3.5"/> In Coda</span>
+      return <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-yellow-50 text-yellow-700 border border-yellow-100"><Clock className="w-3.5 h-3.5"/> {t.queued}</span>
     case 'UPLOADING':
     case 'UPLOADED': 
-      return <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-gray-100 text-gray-600 border border-gray-200"><Loader2 className="w-3.5 h-3.5 animate-spin"/> Caricamento...</span>
+      return <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-gray-100 text-gray-600 border border-gray-200"><Loader2 className="w-3.5 h-3.5 animate-spin"/> {t.uploading}</span>
     default: 
-      return <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-red-50 text-red-700 border border-red-100"><AlertTriangle className="w-3.5 h-3.5"/> Errore</span>
+      return <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-red-50 text-red-700 border border-red-100"><AlertTriangle className="w-3.5 h-3.5"/> {t.error}</span>
   }
 }

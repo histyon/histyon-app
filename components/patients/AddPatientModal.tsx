@@ -6,19 +6,29 @@ import { useFormStatus } from 'react-dom'
 import { addPatient } from '@/lib/actions/patient'
 import { DateOfBirthPicker } from '@/components/ui/DateOfBirthPicker'
 import { ValidatedInput, GlobalLocationSelector } from '@/components/ui/FormElements'
+import { REGEX_VALIDATORS } from '@/lib/constants'
 
-function SubmitButton() {
+// Props interface
+interface ModalProps {
+    dict: any
+}
+
+function SubmitButton({ dict }: { dict: any }) {
   const { pending } = useFormStatus()
+  const t = dict.dashboard.patients.modal;
   return (
     <button disabled={pending} className="w-full bg-black text-white py-3 rounded-xl font-medium hover:bg-gray-800 disabled:opacity-50 mt-6 shadow-lg transition-all hover:scale-[1.01] active:scale-[0.99]">
-      {pending ? 'Salvataggio...' : 'Crea Cartella Paziente'}
+      {pending ? t.btnSaving : t.btnSave}
     </button>
   )
 }
 
-export function AddPatientModal() {
+export function AddPatientModal({ dict }: ModalProps) {
   const [isOpen, setIsOpen] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const t = dict.dashboard.patients.modal;
+  const tf = dict.auth.form;
+  const tPatients = dict.dashboard.patients.empty;
   
   async function handleSubmit(formData: FormData) {
      setError(null) 
@@ -37,7 +47,7 @@ export function AddPatientModal() {
   if (!isOpen) {
     return (
       <button onClick={() => setIsOpen(true)} className="bg-black text-white px-5 py-2.5 rounded-xl text-sm font-semibold flex items-center gap-2 hover:bg-gray-900 transition-shadow shadow-sm">
-        <Plus className="w-4 h-4" /> Nuovo Paziente
+        <Plus className="w-4 h-4" /> {tPatients.btnNew}
       </button>
     )
   }
@@ -48,8 +58,8 @@ export function AddPatientModal() {
         
         <div className="flex justify-between items-start mb-6">
           <div>
-            <h3 className="font-bold text-2xl tracking-tight">Anagrafica Paziente</h3>
-            <p className="text-sm text-gray-500">Compilare tutti i campi obbligatori (*)</p>
+            <h3 className="font-bold text-2xl tracking-tight">{t.title}</h3>
+            <p className="text-sm text-gray-500">{t.subtitle}</p>
           </div>
           <button onClick={() => setIsOpen(false)} className="p-2 bg-gray-100 hover:bg-gray-200 rounded-full transition-colors"><X className="w-5 h-5" /></button>
         </div>
@@ -65,54 +75,54 @@ export function AddPatientModal() {
           
           <div className="space-y-4">
             <h4 className="text-xs font-bold text-gray-400 uppercase tracking-wider flex items-center gap-2">
-                <User className="w-4 h-4" /> Identità
+                <User className="w-4 h-4" /> {tf.sections.identity}
             </h4>
             <div className="grid grid-cols-2 gap-4">
-                <ValidatedInput name="firstName" label="Nome" placeholder="Mario" required />
-                <ValidatedInput name="lastName" label="Cognome" placeholder="Rossi" required />
+                <ValidatedInput name="firstName" label={tf.labels.firstName} placeholder={tf.placeholders.name} required />
+                <ValidatedInput name="lastName" label={tf.labels.lastName} placeholder={tf.placeholders.surname} required />
             </div>
             
             <div className="grid grid-cols-2 gap-4">
-                <ValidatedInput name="fiscalCode" label="CF" className="uppercase font-mono" maxLength={16} placeholder="RSSMRA..." required />
+                <ValidatedInput name="fiscalCode" label={tf.labels.fiscalCode} className="uppercase font-mono" maxLength={16} placeholder={tf.placeholders.cf} required />
                 <div className="relative">
-                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5 ml-1">Sesso *</label>
+                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5 ml-1">{tf.labels.gender} *</label>
                     <select name="gender" required defaultValue="" className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl appearance-none cursor-pointer outline-none focus:ring-4 focus:ring-gray-100 transition-all">
-                        <option value="" disabled>Seleziona</option>
-                        <option value="M">Maschio</option>
-                        <option value="F">Femmina</option>
-                        <option value="OTHER">Altro</option>
+                        <option value="" disabled>{tf.placeholders.select}</option>
+                        <option value="M">{tf.options.male}</option>
+                        <option value="F">{tf.options.female}</option>
+                        <option value="OTHER">{tf.options.other}</option>
                     </select>
                 </div>
             </div>
 
             <div className="space-y-1">
-                 <label className="text-xs font-bold text-gray-500 uppercase tracking-wider ml-1">Data di nascita *</label>
-                 <DateOfBirthPicker name="dob" />
+                 <label className="text-xs font-bold text-gray-500 uppercase tracking-wider ml-1">{tf.labels.dob} *</label>
+                 <DateOfBirthPicker name="dob" dict={dict} />
             </div>
             
-            <ValidatedInput name="placeOfBirth" label="Luogo di Nascita" placeholder="Città" required />
+            <ValidatedInput name="placeOfBirth" label={tf.labels.birthPlace} placeholder={tf.placeholders.city} required />
           </div>
 
           <hr className="border-gray-100" />
 
           <div className="space-y-4">
              <h4 className="text-xs font-bold text-gray-400 uppercase tracking-wider flex items-center gap-2">
-                <Phone className="w-4 h-4" /> Contatti
+                <Phone className="w-4 h-4" /> {tf.sections.contacts}
             </h4>
             <div className="grid grid-cols-2 gap-4">
                 <ValidatedInput 
                     name="email" 
-                    label="Email" 
+                    label={tf.labels.emailSimple} 
                     type="email" 
-                    placeholder="email@paziente.it" 
-                    pattern="^[^\s@]+@[^\s@]+\.[^\s@]+$" 
-                    errorMessage="Email non valida"
+                    placeholder={tf.placeholders.emailPlaceholder} 
+                    pattern={REGEX_VALIDATORS.EMAIL}
+                    errorMessage={dict.validation.emailInvalid}
                     required 
                 />
                 <ValidatedInput 
                     name="phoneNumber" 
                     label="Telefono" 
-                    placeholder="+39 333..." 
+                    placeholder={tf.placeholders.phonePlaceholder} 
                     required 
                 />
             </div>
@@ -122,12 +132,12 @@ export function AddPatientModal() {
 
           <div>
              <h4 className="text-xs font-bold text-gray-400 uppercase tracking-wider flex items-center gap-2 mb-4">
-                <MapPin className="w-4 h-4" /> Domicilio
+                <MapPin className="w-4 h-4" /> {tf.sections.domicile}
             </h4>
-            <GlobalLocationSelector />
+            <GlobalLocationSelector dict={dict} />
           </div>
 
-          <SubmitButton />
+          <SubmitButton dict={dict} />
         </form>
       </div>
     </div>

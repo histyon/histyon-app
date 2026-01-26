@@ -5,13 +5,19 @@ import { useRouter } from 'next/navigation'
 import { UploadCloud, File, CheckCircle2, AlertCircle, Loader2, FileText } from 'lucide-react'
 import { getPresignedUploadUrl, confirmUpload } from '@/lib/actions/storage'
 
-export function InlineFileUploader({ patientId }: { patientId: string }) {
+interface UploaderProps {
+    patientId: string
+    dict: any
+}
+
+export function InlineFileUploader({ patientId, dict }: UploaderProps) {
   const router = useRouter()
   const [file, setFile] = useState<File | null>(null)
   const [notes, setNotes] = useState('')
   const [progress, setProgress] = useState(0)
   const [status, setStatus] = useState<'idle' | 'uploading' | 'success' | 'error'>('idle')
   const [errorMessage, setErrorMessage] = useState('')
+  const t = dict.dashboard.upload;
   
   const fileInputRef = useRef<HTMLInputElement>(null)
 
@@ -31,7 +37,7 @@ export function InlineFileUploader({ patientId }: { patientId: string }) {
       const presignedRes = await getPresignedUploadUrl(file.name, file.type, file.size, patientId, notes)
       
       if (presignedRes.error || !presignedRes.url) {
-        throw new Error(presignedRes.error || 'Errore URL')
+        throw new Error(presignedRes.error || dict.validation.uploadError)
       }
 
       const xhr = new XMLHttpRequest()
@@ -59,11 +65,11 @@ export function InlineFileUploader({ patientId }: { patientId: string }) {
           }, 2000)
         } else {
           setStatus('error')
-          setErrorMessage('Errore caricamento Cloudflare')
+          setErrorMessage(dict.validation.cloudflareError)
         }
       }
 
-      xhr.onerror = () => { setStatus('error'); setErrorMessage('Errore di rete') }
+      xhr.onerror = () => { setStatus('error'); setErrorMessage(dict.validation.networkError) }
       xhr.send(file)
 
     } catch (err: any) {
@@ -91,8 +97,8 @@ export function InlineFileUploader({ patientId }: { patientId: string }) {
               <div className="bg-gray-50 border border-gray-200 p-3 rounded-full mb-3 shadow-sm group-hover:scale-110 transition-transform">
                 <UploadCloud className="w-6 h-6 text-gray-500" />
               </div>
-              <p className="font-bold text-gray-900">Nuova Analisi Istologica</p>
-              <p className="text-xs text-gray-500 mt-1">Trascina qui il file (SVS, NDPI, TIFF)</p>
+              <p className="font-bold text-gray-900">{t.title}</p>
+              <p className="text-xs text-gray-500 mt-1">{t.dragDrop}</p>
             </>
           )}
 
@@ -106,7 +112,7 @@ export function InlineFileUploader({ patientId }: { patientId: string }) {
                     <p className="font-bold text-sm text-gray-900 truncate">{file.name}</p>
                     <p className="text-xs text-gray-500">{(file.size / (1024*1024)).toFixed(2)} MB</p>
                  </div>
-                 <button onClick={(e) => { e.stopPropagation(); setFile(null); }} className="text-xs text-red-500 hover:underline px-2">Rimuovi</button>
+                 <button onClick={(e) => { e.stopPropagation(); setFile(null); }} className="text-xs text-red-500 hover:underline px-2">{t.remove}</button>
               </div>
 
               <div className="relative">
@@ -116,7 +122,7 @@ export function InlineFileUploader({ patientId }: { patientId: string }) {
                  <textarea 
                     value={notes}
                     onChange={(e) => setNotes(e.target.value)}
-                    placeholder="Aggiungi note cliniche (opzionale)..."
+                    placeholder={t.notesPlaceholder}
                     className="w-full pl-10 pr-4 py-2 text-sm border border-gray-200 rounded-lg outline-none focus:border-black focus:ring-1 focus:ring-black min-h-[80px] resize-none"
                     onClick={(e) => e.stopPropagation()} 
                  />
@@ -126,7 +132,7 @@ export function InlineFileUploader({ patientId }: { patientId: string }) {
                 onClick={(e) => { e.stopPropagation(); startUpload(); }}
                 className="w-full bg-black text-white px-6 py-3 rounded-xl text-sm font-bold hover:bg-gray-800 transition-all shadow-lg hover:-translate-y-0.5 flex items-center justify-center gap-2"
               >
-                <UploadCloud className="w-4 h-4" /> Avvia Upload e Analisi
+                <UploadCloud className="w-4 h-4" /> {t.btnStart}
               </button>
             </div>
           )}
@@ -140,24 +146,24 @@ export function InlineFileUploader({ patientId }: { patientId: string }) {
                 <div className="w-full bg-gray-200 rounded-full h-1.5 overflow-hidden">
                    <div className="bg-black h-1.5 rounded-full transition-all duration-200" style={{ width: `${progress}%` }}></div>
                 </div>
-                <p className="text-xs text-gray-400 mt-2 animate-pulse">Invio sicuro al Cloud...</p>
+                <p className="text-xs text-gray-400 mt-2 animate-pulse">{t.sending}</p>
              </div>
           )}
 
           {status === 'success' && (
              <div className="h-full flex flex-col justify-center items-center">
                <CheckCircle2 className="w-12 h-12 text-green-600 mb-2 animate-in zoom-in" />
-               <p className="font-bold text-green-700">Ticket Creato</p>
-               <p className="text-xs text-green-600">In attesa dell'AI...</p>
+               <p className="font-bold text-green-700">{t.successTitle}</p>
+               <p className="text-xs text-green-600">{t.successMsg}</p>
              </div>
           )}
 
           {status === 'error' && (
              <div className="h-full flex flex-col justify-center items-center">
                <AlertCircle className="w-10 h-10 text-red-600 mb-2" />
-               <p className="font-bold text-red-700">Errore Upload</p>
+               <p className="font-bold text-red-700">{t.errorTitle}</p>
                <p className="text-xs text-red-600 mt-1 max-w-xs text-center">{errorMessage}</p>
-               <button onClick={(e) => { e.stopPropagation(); setStatus('idle'); }} className="mt-4 text-xs font-bold underline text-red-700">Riprova</button>
+               <button onClick={(e) => { e.stopPropagation(); setStatus('idle'); }} className="mt-4 text-xs font-bold underline text-red-700">{t.retry}</button>
              </div>
           )}
         </div>

@@ -8,11 +8,17 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { getPresignedDownloadUrl } from '@/lib/actions/storage'
 
-export function TicketRealtimeView({ initialTicket }: { initialTicket: any }) {
+interface RealTimeProps {
+    initialTicket: any
+    dict: any
+}
+
+export function TicketRealtimeView({ initialTicket, dict }: RealTimeProps) {
   const [ticket, setTicket] = useState(initialTicket)
   const [isDownloading, setIsDownloading] = useState(false)
   const supabase = createClient()
   const router = useRouter()
+  const t = dict.dashboard.realtime;
 
   const rawStatus = ticket.status || 'UPLOADING'
   const status = rawStatus.toUpperCase().trim()
@@ -42,7 +48,7 @@ export function TicketRealtimeView({ initialTicket }: { initialTicket: any }) {
     const outputFileName = ticket.output_dzi_url || ticket.ai_metadata?.output_file
     
     if (!outputFileName) {
-        alert("File di output non ancora pronto.")
+        alert(t.outputNotReady)
         setIsDownloading(false)
         return
     }
@@ -51,8 +57,6 @@ export function TicketRealtimeView({ initialTicket }: { initialTicket: any }) {
     if (!outputFileName.includes('/')) {
          fullPathKey = `${ticket.doctor_id}/${ticket.patient_id}/${outputFileName}`;
     }
-
-    console.log("Richiesta download per:", fullPathKey)
 
     const res = await getPresignedDownloadUrl(fullPathKey, 'output')
     
@@ -64,7 +68,7 @@ export function TicketRealtimeView({ initialTicket }: { initialTicket: any }) {
         link.click();
         document.body.removeChild(link);
     } else {
-        alert("Errore: Impossibile trovare il file nello storage.")
+        alert(dict.validation.fileNotFound)
     }
     setIsDownloading(false)
   }
@@ -83,7 +87,7 @@ export function TicketRealtimeView({ initialTicket }: { initialTicket: any }) {
     <div className="space-y-8 animate-in fade-in duration-500">
       
       <div className="bg-white p-8 rounded-3xl border border-gray-200 shadow-sm w-full">
-         <StatusTimeline status={status} />
+         <StatusTimeline status={status} dict={dict} />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8 items-stretch">
@@ -91,22 +95,22 @@ export function TicketRealtimeView({ initialTicket }: { initialTicket: any }) {
          <div className="lg:col-span-1 flex flex-col gap-6">
             <div className="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm">
                 <h3 className="font-bold text-lg mb-4 flex items-center gap-2">
-                    <HardDrive className="w-5 h-5" /> Dati Sorgente
+                    <HardDrive className="w-5 h-5" /> {t.sourceData}
                 </h3>
                 <div className="space-y-4 text-sm">
                     <div className="pb-3 border-b border-gray-50">
-                        <p className="text-gray-400 text-xs uppercase font-bold tracking-wider mb-1">Nome File Input</p>
+                        <p className="text-gray-400 text-xs uppercase font-bold tracking-wider mb-1">{t.inputFile}</p>
                         <p className="font-mono text-gray-900 break-all bg-gray-50 p-2 rounded-lg border border-gray-100 text-xs">
                            {ticket.file_name}
                         </p>
                     </div>
                     <div className="flex justify-between">
                         <div>
-                            <p className="text-gray-400 text-xs uppercase font-bold tracking-wider">Dimensione</p>
+                            <p className="text-gray-400 text-xs uppercase font-bold tracking-wider">{t.size}</p>
                             <p className="font-bold">{(ticket.file_size / (1024*1024)).toFixed(2)} MB</p>
                         </div>
                         <div className="text-right">
-                            <p className="text-gray-400 text-xs uppercase font-bold tracking-wider">Data</p>
+                            <p className="text-gray-400 text-xs uppercase font-bold tracking-wider">{t.date}</p>
                             <p className="font-medium" suppressHydrationWarning>
                                 {new Date(ticket.created_at).toLocaleDateString('it-IT')}
                             </p>
@@ -117,11 +121,11 @@ export function TicketRealtimeView({ initialTicket }: { initialTicket: any }) {
             
             <div className="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm flex flex-col h-full">
                 <h3 className="font-bold text-sm text-gray-400 uppercase tracking-wider mb-3 flex items-center gap-2">
-                    <FileText className="w-4 h-4" /> Note Cliniche
+                    <FileText className="w-4 h-4" /> {t.clinicalNotes}
                 </h3>
                 <div className="bg-yellow-50/50 p-4 rounded-xl border border-yellow-100 flex-grow break-words">
                     <p className="text-gray-700 text-sm italic leading-relaxed whitespace-pre-wrap">
-                        {ticket.notes || "Nessuna nota clinica inserita."}
+                        {ticket.notes || t.noNotes}
                     </p>
                 </div>
             </div>
@@ -133,11 +137,11 @@ export function TicketRealtimeView({ initialTicket }: { initialTicket: any }) {
                 <div className="flex justify-between items-start mb-8">
                     <div>
                         <h3 className="font-bold text-2xl opacity-90">
-                           {isError ? 'Errore Analisi' : isCompleted ? 'Analisi Completata' : 'Stato Avanzamento'}
+                           {isError ? t.errorAnalysis : isCompleted ? t.completedAnalysis : t.progressStatus}
                         </h3>
                         <p className="text-sm opacity-70 mt-1 uppercase tracking-widest font-bold flex items-center gap-2">
                             {isError && <AlertTriangle className="w-4 h-4" />}
-                            STATUS: {status === 'QUEUED' ? 'IN CODA' : status}
+                            {t.statusLabel}: {status === 'QUEUED' ? 'IN CODA' : status}
                         </p>
                     </div>
                 </div>
@@ -148,18 +152,18 @@ export function TicketRealtimeView({ initialTicket }: { initialTicket: any }) {
                             <XCircle className="w-12 h-12 text-white" />
                         </div>
                         <div className="max-w-md w-full">
-                            <p className="text-2xl font-bold mb-4">Processo Interrotto</p>
+                            <p className="text-2xl font-bold mb-4">{t.processInterrupted}</p>
                             <div className="bg-black/20 p-5 rounded-xl border border-white/10 text-left backdrop-blur-sm">
-                                <p className="text-[10px] uppercase font-bold opacity-70 mb-2 tracking-wider">Dettagli Errore:</p>
+                                <p className="text-[10px] uppercase font-bold opacity-70 mb-2 tracking-wider">{t.errorDetails}</p>
                                 <p className="font-mono text-sm leading-relaxed text-red-100">
-                                    {ticket.ai_metadata?.error || "Errore generico durante l'elaborazione del file."}
+                                    {ticket.ai_metadata?.error || t.genericError}
                                 </p>
                             </div>
                             <Link 
                                 href={`/dashboard/patient/${ticket.patient_id}?tab=analysis&upload=true`}
                                 className="mt-8 inline-flex items-center gap-2 bg-white text-red-600 px-8 py-4 rounded-xl font-bold hover:bg-red-50 transition-all shadow-xl hover:scale-105"
                             >
-                                <RefreshCw className="w-5 h-5" /> Riprova Caricamento
+                                <RefreshCw className="w-5 h-5" /> {t.retryUpload}
                             </Link>
                         </div>
                      </div>
@@ -174,7 +178,7 @@ export function TicketRealtimeView({ initialTicket }: { initialTicket: any }) {
                                     <FileImage className="w-6 h-6" />
                                 </div>
                                 <div className="min-w-0 flex-1">
-                                    <p className="text-xs uppercase font-bold opacity-70">File Output Generato</p>
+                                    <p className="text-xs uppercase font-bold opacity-70">{t.outputFile}</p>
                                     <p className="font-mono text-sm font-bold truncate w-full" title={displayOutputName}>
                                         {displayOutputName}
                                     </p>
@@ -186,13 +190,13 @@ export function TicketRealtimeView({ initialTicket }: { initialTicket: any }) {
                                 className="flex-shrink-0 w-full sm:w-auto flex items-center justify-center gap-2 bg-white text-green-700 px-5 py-3 rounded-xl font-bold hover:bg-green-50 transition-all shadow-lg hover:scale-105 disabled:opacity-50 disabled:scale-100"
                             >
                                 {isDownloading ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
-                                Scarica
+                                {t.download}
                             </button>
                         </div>
 
                         <div className="flex flex-col gap-2 h-full min-h-[200px]">
                             <p className="text-xs uppercase font-bold opacity-70 flex items-center gap-2">
-                                <Code2 className="w-4 h-4" /> Risultati AI (JSON)
+                                <Code2 className="w-4 h-4" /> {t.resultsJson}
                             </p>
                             
                             {ticket.ai_results ? (
@@ -203,7 +207,7 @@ export function TicketRealtimeView({ initialTicket }: { initialTicket: any }) {
                                 </div>
                             ) : (
                                 <div className="bg-black/20 p-5 rounded-2xl font-mono text-xs h-32 border border-white/10 shadow-inner flex items-center justify-center text-white/40 italic">
-                                    Nessun dato strutturato (ai_results) disponibile.
+                                    {t.noJson}
                                 </div>
                             )}
                         </div>
@@ -221,12 +225,12 @@ export function TicketRealtimeView({ initialTicket }: { initialTicket: any }) {
                         </div>
                         <div className="max-w-md">
                             <p className="text-2xl font-bold mb-3">
-                                {status === 'QUEUED' ? 'In Coda sul Cloud' : 'Analisi in Corso'}
+                                {status === 'QUEUED' ? t.queuedTitle : t.processingTitle}
                             </p>
                             <p className="opacity-80 text-base leading-relaxed font-medium">
                                 {status === 'QUEUED' 
-                                    ? 'Il file è al sicuro. Aspettiamo che il motore AI lo prenda in carico.' 
-                                    : 'Sto analizzando i tessuti e generando i risultati JSON.'}
+                                    ? t.queuedDesc 
+                                    : t.processingDesc}
                             </p>
                         </div>
                     </div>

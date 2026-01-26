@@ -4,12 +4,16 @@ import { ArrowLeft } from 'lucide-react'
 import Link from 'next/link'
 import { TicketRealtimeView } from '@/components/ticket/TicketRealTimeView'
 import TicketResult from '@/components/ticket/TicketResult'
+import { getDictionary } from '@/lib/dictionary'
 
 export default async function TicketPage(props: {
   params: Promise<{ id: string }>
 }) {
   const { id } = await props.params
   const supabase = await createClient()
+  
+  const dict = await getDictionary();
+  const t = dict.dashboard.tickets.detail;
 
   const { data: ticket } = await supabase
     .from('tickets')
@@ -30,16 +34,16 @@ export default async function TicketPage(props: {
         </Link>
         <div>
             <h1 className="text-3xl font-bold tracking-tight text-gray-900 flex items-center gap-3">
-                Analisi #{ticket.id.slice(0, 8)}
+                {t.analysis} #{ticket.id.slice(0, 8)}
             </h1>
             <p className="text-gray-500 text-sm mt-1">
-                Paziente: <span className="font-bold text-black">{ticket.patients.first_name} {ticket.patients.last_name}</span>
+                {t.patient}: <span className="font-bold text-black">{ticket.patients.first_name} {ticket.patients.last_name}</span>
             </p>
         </div>
       </div>
 
-      <TicketRealtimeView initialTicket={ticket} />
-      <TicketResult ticket={ticket} />
+      <TicketRealtimeView initialTicket={ticket} dict={dict} />
+      <TicketResult ticket={ticket} dict={dict} />
     </div>
   )
 }

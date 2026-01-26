@@ -1,16 +1,20 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import { getDictionary } from '@/lib/dictionary';
 
-export const metadata: Metadata = {
-  title: {
-    template: '%s | Histyon',
-    default: 'Home | Histyon',
-  },
-  description: "Advanced Medical Diagnostics",
-  icons: {
-    icon: '/logo-white.png', 
+export async function generateMetadata(): Promise<Metadata> {
+  const dict = await getDictionary();
+  return {
+    title: {
+      template: dict.metadata.titleTemplate,
+      default: dict.metadata.defaultTitle,
+    },
+    description: dict.metadata.description,
+    icons: {
+      icon: '/logo-white.png', 
+    }
   }
-};
+}
 
 export default function RootLayout({
   children,

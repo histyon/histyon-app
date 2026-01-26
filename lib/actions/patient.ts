@@ -3,6 +3,12 @@
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 import { z } from 'zod'
+import { dictionary } from '@/lib/dictionary'
+import { REGEX_VALIDATORS } from '@/lib/constants'
+
+// Note: spostiamo lo schema qui dentro o lo importiamo da lib/schemas.ts
+// Per coerenza con gli altri file, se usi PatientSchema di lib/schemas, assicurati che usi il dizionario.
+// Se invece è definito localmente come nel file originale:
 
 const PatientSchema = z.object({
   firstName: z.string().min(2),
@@ -16,8 +22,8 @@ const PatientSchema = z.object({
   city: z.string().optional(),
   province: z.string().optional(),
   postalCode: z.string().optional(),
-  email: z.string().email("Email non valida"),
-  phoneNumber: z.string().min(5, "Numero troppo corto"),
+  email: z.string().email(dictionary.validation.emailInvalid),
+  phoneNumber: z.string().min(5, dictionary.validation.phoneShort),
 })
 
 export async function addPatient(prevState: any, formData: FormData) {
@@ -25,7 +31,7 @@ export async function addPatient(prevState: any, formData: FormData) {
   
   // controllo di sicurezza: chi sta facendo questa richiesta?
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return { error: 'Non autorizzato' }
+  if (!user) return { error: dictionary.validation.unauthorized }
 
   // assemblo la data di nascita dai campi separati
   const day = formData.get('dob_day')
@@ -61,7 +67,7 @@ export async function addPatient(prevState: any, formData: FormData) {
     .eq('fiscal_code', validated.data.fiscalCode)
     .single()
 
-  if (existing) return { error: 'Paziente già presente in archivio.' }
+  if (existing) return { error: dictionary.validation.patientExists }
 
   // inserisco finalmente il paziente collegandolo al dottore loggato
   const { error } = await supabase.from('patients').insert({

@@ -102,15 +102,17 @@ export const it = {
       alreadyAccount: "Possiedi già un account?",
       accessConsole: "Accedi alla Console",
       steps: {
-        one: "Step 1", two: "Step 2", three: "Step 3",
-        registry: "Anagrafica", residence: "Residenza", profession: "Professione & Account"
+        step: "Passaggio",
+        registry: "Anagrafica", 
+        residence: "Residenza", 
+        profession: "Credenziali"
       },
-      buttons: { back: "Indietro", next: "Avanti", complete: "Completa Registrazione" },
+      buttons: { back: "Indietro", next: "Continua", complete: "Crea Account" },
       success: {
         title: "Controlla la tua Email",
         desc: "Ti abbiamo inviato un link di conferma. Per attivare il tuo account e accedere alla dashboard, è necessario verificare l'indirizzo email.",
         spamNotice: "Non hai ricevuto l'email? Controlla nella cartella Spam o Promozioni.",
-        backToLogin: "Torna alla pagina di Login"
+        backToLogin: "Torna al Login"
       }
     },
     form: {
@@ -129,7 +131,7 @@ export const it = {
       },
       options: { male: "Maschio", female: "Femmina", other: "Altro" },
       sections: { credentials: "Credenziali Accesso", identity: "Identità", contacts: "Contatti", domicile: "Domicilio" },
-      warnings: { attention: "Attenzione", required: "Obbligatorio", requiredSymbol: "*", loading: "Caricamento..." }
+      warnings: { attention: "Attenzione", required: "Obbligatorio", requiredSymbol: "*", loading: "Elaborazione..." }
     }
   },
   dashboard: {

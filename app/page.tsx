@@ -218,7 +218,7 @@ export default async function LandingPage() {
                </div>
 
                <div className="bg-gray-900 text-white rounded-[2.5rem] p-10 relative overflow-hidden group shadow-2xl flex flex-col md:-mt-8 md:-mb-8 z-10 hover:scale-[1.02] transition-transform duration-700 ease-out">
-                  <div className="absolute top-0 right-0 p-12 opacity-5 group-hover:opacity-10 transition-opacity transform group-hover:rotate-12 duration-1000 ease-out">
+                  <div className="absolute top-0 right-0 p-12 opacity-5 group-hover:opacity-10 transition-opacity transform ease-out">
                      <BrainCircuit className="w-64 h-64" />
                   </div>
                   <div className="relative z-10 flex flex-col h-full">

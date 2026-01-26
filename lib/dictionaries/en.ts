@@ -83,7 +83,9 @@ export const en = {
       backToLogin: "Back to Login",
       successTitle: "Email Sent",
       successDesc: "If the address is in our system, you will receive reset instructions shortly.",
-      errorGeneric: "An error occurred. Please try again later."
+      errorGeneric: "An error occurred. Please try again later.",
+      emailConfirmed: "Email successfully confirmed. You can now login.",
+      linkInvalid: "Invalid or expired link."
     },
     updatePassword: {
       title: "New Password",

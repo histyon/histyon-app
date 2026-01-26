@@ -73,7 +73,9 @@ export const pt = {
       medicalProfile: "Perfil médico",
       btn: "Entrar",
       forgotPassword: "Esqueceu a senha?",
-      successRedirect: "Conta verificada. Faça login."
+      successRedirect: "Conta verificada. Faça login.",
+      emailConfirmed: "E-mail confirmado com sucesso. Agora você pode entrar.",
+      linkInvalid: "Link inválido ou expirado."
     },
     forgotPassword: {
       title: "Recuperar Senha",

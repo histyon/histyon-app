@@ -73,7 +73,9 @@ export const de = {
       medicalProfile: "Ärztliches Profil",
       btn: "Anmelden",
       forgotPassword: "Passwort vergessen?",
-      successRedirect: "Konto verifiziert. Bitte anmelden."
+      successRedirect: "Konto verifiziert. Bitte anmelden.",
+      emailConfirmed: "E-Mail erfolgreich bestätigt. Sie können sich jetzt anmelden.",
+      linkInvalid: "Ungültiger oder abgelaufener Link."
     },
     forgotPassword: {
       title: "Passwort-Wiederherstellung",

@@ -73,7 +73,9 @@ export const ru = {
       medicalProfile: "Мед. профиль",
       btn: "Войти",
       forgotPassword: "Забыли пароль?",
-      successRedirect: "Аккаунт подтвержден. Войдите."
+      successRedirect: "Аккаунт подтвержден. Войдите.",
+      emailConfirmed: "Email успешно подтвержден. Теперь вы можете войти.",
+      linkInvalid: "Ссылка недействительна или истекла."
     },
     forgotPassword: {
       title: "Восстановление",

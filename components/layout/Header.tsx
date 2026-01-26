@@ -40,7 +40,7 @@ export async function Header({ variant = 'public', userProfile }: HeaderProps) {
           <div className="h-5 w-px bg-gray-200 hidden md:block"></div>
 
           {user ? (
-            <UserDropdown user={user} profile={userProfile} dict={dict} />
+            <UserDropdown user={user} profile={userProfile} dict={dict as any} />
           ) : (
             <div className="flex items-center gap-4">
               <Link 

@@ -73,7 +73,11 @@ export const it = {
       medicalProfile: "Profilo medico SSN",
       btn: "Accedi",
       forgotPassword: "Password dimenticata?",
-      successRedirect: "Account verificato. Effettua l'accesso."
+      successRedirect: "Account verificato. Effettua l'accesso.",
+      // --- NUOVE RIGHE AGGIUNTE ---
+      emailConfirmed: "Email confermata con successo. Ora puoi accedere.",
+      linkInvalid: "Link non valido o scaduto."
+      // ----------------------------
     },
     forgotPassword: {
       title: "Recupero Password",
@@ -289,11 +293,11 @@ export const it = {
     passwordComplexity: "Deve contenere almeno una lettera Maiuscola",
     passwordSpecial: "Deve contenere almeno un carattere speciale",
     passwordRegexMsg: "Inserire una maiuscola, numero e carattere speciale",
-    passwordMismatch: "Le password non coincidono", // AGGIUNTO
+    passwordMismatch: "Le password non coincidono", 
     name: "Solo lettere", nameAllowed: "Solo lettere consentite",
     fiscalCodeLen: "16 car. alfanumerici", fiscalCodeFormat: "Formato errato",
     emailInvalid: "Email non valida", phoneShort: "Numero troppo corto",
-    required: "Obbligatorio", genericError: "Si è verificato un errore imprevisto.", // AGGIORNATO
+    required: "Obbligatorio", genericError: "Si è verificato un errore imprevisto.", 
     alreadyRegistered: "Questa email è già registrata.",
     profileError: "Errore salvataggio profilo: ",
     patientExists: "Paziente già presente in archivio.",
@@ -305,6 +309,6 @@ export const it = {
     fileNotFound: "Impossibile trovare il file nello storage.",
     fileRetrievalError: "Impossibile recuperare il file",
     credentialsInvalid: "Credenziali non valide",
-    linkSent: "Link inviato correttamente" // AGGIUNTO
+    linkSent: "Link inviato correttamente" 
   }
 }

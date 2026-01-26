@@ -43,7 +43,6 @@ export function LanguageSwitcher({ currentLang }: LanguageSwitcherProps) {
         {isPending ? (
             <Loader2 className="w-4 h-4 animate-spin" />
         ) : (
-            // Se abbiamo la bandiera usiamo quella, altrimenti il globo
             currentFlag ? <span className="text-base leading-none">{currentFlag}</span> : <Globe className="w-4 h-4" />
         )}
         <span className="uppercase">{currentLang}</span>
@@ -51,7 +50,6 @@ export function LanguageSwitcher({ currentLang }: LanguageSwitcherProps) {
 
       {isOpen && (
         <>
-            {/* Backdrop trasparente per chiudere cliccando fuori */}
             <div className="fixed inset-0 z-40" onClick={() => setIsOpen(false)}></div>
             
             <div className="absolute right-0 top-full mt-2 w-56 bg-white rounded-xl shadow-xl border border-gray-100 p-1 z-50 animate-in fade-in slide-in-from-top-2 duration-200 max-h-[300px] overflow-y-auto">

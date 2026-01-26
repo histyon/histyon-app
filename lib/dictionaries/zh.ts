@@ -73,7 +73,9 @@ export const zh = {
       medicalProfile: "医疗档案",
       btn: "登录",
       forgotPassword: "忘记密码？",
-      successRedirect: "账户已验证。请登录。"
+      successRedirect: "账户已验证。请登录。",
+      emailConfirmed: "邮箱确认成功。现在可以登录。",
+      linkInvalid: "链接无效或已过期。"
     },
     forgotPassword: {
       title: "密码恢复",

@@ -73,7 +73,11 @@ export const hi = {
       medicalProfile: "चिकित्सा प्रोफ़ाइल",
       btn: "साइन इन",
       forgotPassword: "पासवर्ड भूल गए?",
-      successRedirect: "खाता सत्यापित। कृपया साइन इन करें।"
+      successRedirect: "खाता सत्यापित। कृपया साइन इन करें।",
+      login: {
+      emailConfirmed: "ईमेल सफलतापूर्वक पुष्टि की गई। अब आप लॉग इन कर सकते हैं।",
+      linkInvalid: "अमान्य या समाप्त लिंक।"
+}
     },
     forgotPassword: {
       title: "पासवर्ड रिकवरी",

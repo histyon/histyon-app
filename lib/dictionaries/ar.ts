@@ -73,7 +73,9 @@ export const ar = {
       medicalProfile: "ملف طبي",
       btn: "تسجيل الدخول",
       forgotPassword: "نسيت كلمة المرور؟",
-      successRedirect: "تم التحقق من الحساب. الرجاء تسجيل الدخول."
+      successRedirect: "تم التحقق من الحساب. الرجاء تسجيل الدخول.",
+      emailConfirmed: "تم تأكيد البريد الإلكتروني بنجاح. يمكنك الآن الدخول.",
+      linkInvalid: "الرابط غير صالح أو منتهي الصلاحية."
     },
     forgotPassword: {
       title: "استعادة كلمة المرور",

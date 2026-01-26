@@ -24,7 +24,7 @@ const dictionaries = {
   ru
 }
 
-export type Dictionary = typeof it
+export type Dictionary = typeof it;
 
 export type Locale = keyof typeof dictionaries
 export const defaultLocale: Locale = 'it'

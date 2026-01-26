@@ -4,6 +4,7 @@ import { useState, useTransition } from 'react'
 import { Globe, Check, Loader2 } from 'lucide-react'
 import { setLanguage } from '@/lib/actions/language'
 import { useRouter } from 'next/navigation'
+import { LOCALES } from '@/lib/constants'
 
 interface LanguageSwitcherProps {
   currentLang: string
@@ -13,11 +14,6 @@ export function LanguageSwitcher({ currentLang }: LanguageSwitcherProps) {
   const [isOpen, setIsOpen] = useState(false)
   const [isPending, startTransition] = useTransition()
   const router = useRouter()
-
-  const languages = [
-    { code: 'it', label: 'Italiano', flag: '🇮🇹' },
-    { code: 'en', label: 'English', flag: '🇺🇸' }
-  ]
 
   const handleSwitch = (code: string) => {
     if (code === currentLang) {
@@ -32,6 +28,8 @@ export function LanguageSwitcher({ currentLang }: LanguageSwitcherProps) {
     })
   }
 
+  const currentFlag = LOCALES.find(l => l.code === currentLang)?.flag
+
   return (
     <div className="relative">
       <button 
@@ -45,19 +43,22 @@ export function LanguageSwitcher({ currentLang }: LanguageSwitcherProps) {
         {isPending ? (
             <Loader2 className="w-4 h-4 animate-spin" />
         ) : (
-            <Globe className="w-4 h-4" />
+            // Se abbiamo la bandiera usiamo quella, altrimenti il globo
+            currentFlag ? <span className="text-base leading-none">{currentFlag}</span> : <Globe className="w-4 h-4" />
         )}
         <span className="uppercase">{currentLang}</span>
       </button>
 
       {isOpen && (
         <>
+            {/* Backdrop trasparente per chiudere cliccando fuori */}
             <div className="fixed inset-0 z-40" onClick={() => setIsOpen(false)}></div>
-            <div className="absolute right-0 top-full mt-2 w-48 bg-white rounded-xl shadow-xl border border-gray-100 p-1 z-50 animate-in fade-in slide-in-from-top-2 duration-200">
-                <div className="text-xs font-bold text-gray-400 px-3 py-2 uppercase tracking-wider border-b border-gray-50 mb-1">
+            
+            <div className="absolute right-0 top-full mt-2 w-56 bg-white rounded-xl shadow-xl border border-gray-100 p-1 z-50 animate-in fade-in slide-in-from-top-2 duration-200 max-h-[300px] overflow-y-auto">
+                <div className="text-xs font-bold text-gray-400 px-3 py-2 uppercase tracking-wider border-b border-gray-50 mb-1 sticky top-0 bg-white z-10">
                     Select Language
                 </div>
-                {languages.map((lang) => (
+                {LOCALES.map((lang) => (
                     <button
                         key={lang.code}
                         onClick={() => handleSwitch(lang.code)}
@@ -67,8 +68,8 @@ export function LanguageSwitcher({ currentLang }: LanguageSwitcherProps) {
                         `}
                     >
                         <span className="flex items-center gap-3">
-                            <span className="text-base">{lang.flag}</span>
-                            {lang.label}
+                            <span className="text-xl leading-none">{lang.flag}</span>
+                            {lang.name}
                         </span>
                         {currentLang === lang.code && <Check className="w-3.5 h-3.5 text-black" />}
                     </button>

@@ -10,13 +10,14 @@ export default async function DashboardLayout({ children }: { children: React.Re
 
   const { data: profile } = await supabase
     .from('profiles')
-    .select('first_name, last_name, hospital_name')
+    .select('*') // Prendiamo tutto per sicurezza
     .eq('id', user.id)
     .single()
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col font-sans">
-      <Header variant="app" userProfile={profile} />
+      {/* CORRETTO: variant="dashboard" */}
+      <Header variant="dashboard" userProfile={profile} />
       {children}
     </div>
   )

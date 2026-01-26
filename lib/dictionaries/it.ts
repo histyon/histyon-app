@@ -1,4 +1,3 @@
-// lib/dictionaries/it.ts
 export const it = {
   metadata: {
     titleTemplate: '%s | Histyon',
@@ -9,17 +8,42 @@ export const it = {
   },
   landing: {
     hero: {
-      title: "Diagnostica",
-      subtitle: "Next-Gen.",
-      description: "La piattaforma definitiva per l'archiviazione sicura e l'analisi istologica assistita da AI. Progettata per l'eccellenza clinica.",
+      badge: "HISTYON v1.0",
+      title_line1: "Diagnostica digitale",
+      title_line2: "senza compromessi.",
+      description: "La piattaforma all-in-one per l'archiviazione sicura di vetrini WSI e l'analisi morfometrica assistita. Progettata per supportare, non sostituire, il patologo.",
       ctaAccess: "Richiedi Accesso",
       ctaDocs: "Documentazione"
     },
+    workflow: {
+      title: "Il tuo flusso di lavoro,",
+      title_colored: "semplicemente più veloce.",
+      description: "Abbiamo eliminato i tempi morti. Carica gigabyte di dati istologici in secondi e lascia che i nostri algoritmi lavorino in background mentre ti dedichi ai pazienti.",
+      card_header_secure: "HIPAA SECURE",
+      card_patient_label: "PAZIENTE",
+      card_patient_name: "Rossi, Mario",
+      card_patient_id: "ID: #8492-BX",
+      card_status: "ANALISI PRONTA",
+      card_ai_active: "AI LAYER ACTIVE",
+      card_action_btn: "Visualizza Report",
+      step1_title: "Ingestione Cloud",
+      step1_desc: "Upload diretto su storage crittografato.",
+      step2_title: "Elaborazione AI",
+      step2_desc: "Analisi tissutale automatica su server dedicati.",
+      step3_title: "Refertazione",
+      step3_desc: "Accesso istantaneo ai risultati ovunque."
+    },
     features: {
-      security: { title: "Sicurezza HIPAA", desc: "Crittografia End-to-End." },
-      storage: { title: "Cloud Storage", desc: "Archivio WSI illimitato." },
-      ai: { title: "AI Analysis", desc: "Motore neurale attivo." },
-      console: "Console"
+      title: "Eccellenza Clinica",
+      title_colored: "e Sicurezza Dati.",
+      subtitle: "La sicurezza dei dati non è una feature opzionale. È il fondamento della nostra architettura.",
+      feat1_title: "Archivio WSI Illimitato",
+      feat1_desc: "Dimentica gli hard disk esterni. Uno spazio cloud sicuro, accessibile ovunque, per tutti i tuoi vetrini digitali.",
+      feat2_title: "Seconda Opinione",
+      feat2_desc: "Algoritmi di Deep Learning evidenziano le aree di interesse (ROI) per velocizzare lo screening preliminare.",
+      feat2_trusted: "Fidato dai laboratori moderni",
+      feat3_title: "Privacy by Design",
+      feat3_desc: "I dati dei pazienti sono isolati e cifrati. Tu sei l'unico proprietario delle tue informazioni cliniche."
     },
     footer: {
       copyright: "Histyon. Tutti i diritti riservati.",
@@ -48,7 +72,26 @@ export const it = {
       requestAccess: "Richiedi Accesso",
       medicalProfile: "Profilo medico SSN",
       btn: "Accedi",
+      forgotPassword: "Password dimenticata?",
       successRedirect: "Account verificato. Effettua l'accesso."
+    },
+    forgotPassword: {
+      title: "Recupero Password",
+      heading: "Password dimenticata?",
+      subheading: "Inserisci la tua email istituzionale. Ti invieremo un link sicuro per reimpostare la password.",
+      btn: "Invia Link di Reset",
+      backToLogin: "Torna al Login",
+      successTitle: "Email Inviata",
+      successDesc: "Se l'indirizzo è presente nei nostri sistemi, riceverai a breve le istruzioni per il reset.",
+      errorGeneric: "Si è verificato un errore. Riprova più tardi."
+    },
+    updatePassword: {
+      title: "Nuova Password",
+      heading: "Imposta Nuova Password",
+      subheading: "Scegli una password sicura per il tuo account.",
+      btn: "Aggiorna Password",
+      success: "Password aggiornata con successo. Reindirizzamento...",
+      errorMatch: "Le password non coincidono."
     },
     register: {
       title: "Registrati",
@@ -62,9 +105,10 @@ export const it = {
       },
       buttons: { back: "Indietro", next: "Avanti", complete: "Completa Registrazione" },
       success: {
-        title: "Registrazione Completata",
-        desc: "Il tuo profilo professionale è stato creato correttamente. Stiamo preparando il tuo ambiente di lavoro sicuro.",
-        redirect: "Reindirizzamento alla pagina di login..."
+        title: "Controlla la tua Email",
+        desc: "Ti abbiamo inviato un link di conferma. Per attivare il tuo account e accedere alla dashboard, è necessario verificare l'indirizzo email.",
+        spamNotice: "Non hai ricevuto l'email? Controlla nella cartella Spam o Promozioni.",
+        backToLogin: "Torna alla pagina di Login"
       }
     },
     form: {
@@ -73,7 +117,7 @@ export const it = {
         dob: "Data di nascita", birthPlace: "Luogo di Nascita", phone: "Telefono Cellulare",
         country: "Paese", address: "Indirizzo", civic: "Civico", zip: "CAP", city: "Città", province: "Provincia",
         medicalLicense: "N. Ordine", hospital: "Struttura", email: "Email Istituzionale", password: "Password Sicura",
-        emailSimple: "Email", passwordSimple: "Password"
+        emailSimple: "Email", passwordSimple: "Password", confirmPassword: "Conferma Password"
       },
       placeholders: {
         name: "Mario", surname: "Rossi", cf: "RSSMRA...", city: "Città", address: "Via/Piazza", civic: "N.",
@@ -137,7 +181,29 @@ export const it = {
       fullProject: "Progetto QuPath Completo", downloadZip: "Scarica il file .zip per aprire l'analisi sul tuo PC.",
       btnDownload: "Scarica Progetto (.zip)"
     },
-    profile: { dob: "Data di Nascita", birthPlace: "Luogo di Nascita", residence: "Residenza", contacts: "Contatti" }
+    profile: { dob: "Data di Nascita", birthPlace: "Luogo di Nascita", residence: "Residenza", contacts: "Contatti" },
+    settings: {
+      title: "Impostazioni Profilo",
+      subtitle: "Gestisci i tuoi dati personali, le preferenze e la sicurezza dell'account.",
+      tabs: { profile: "Dati Personali", security: "Sicurezza" },
+      sections: {
+        personal: "Informazioni Personali",
+        residence: "Residenza",
+        professional: "Dati Professionali",
+        email: "Indirizzo Email",
+        password: "Password"
+      },
+      form: {
+        updateBtn: "Salva Modifiche",
+        success: "Profilo aggiornato con successo.",
+        emailNotice: "Modificando l'email riceverai una conferma.",
+        passwordNotice: "Lascia vuoto per mantenere la password attuale.",
+        savePassword: "Imposta Nuova Password",
+        newPassword: "Nuova Password",
+        confirmPassword: "Conferma Password",
+        updating: "Salvataggio..."
+      }
+    }
   },
   legal: {
     title: "Centro Legale & Privacy",
@@ -223,10 +289,11 @@ export const it = {
     passwordComplexity: "Deve contenere almeno una lettera Maiuscola",
     passwordSpecial: "Deve contenere almeno un carattere speciale",
     passwordRegexMsg: "Inserire una maiuscola, numero e carattere speciale",
+    passwordMismatch: "Le password non coincidono", // AGGIUNTO
     name: "Solo lettere", nameAllowed: "Solo lettere consentite",
     fiscalCodeLen: "16 car. alfanumerici", fiscalCodeFormat: "Formato errato",
     emailInvalid: "Email non valida", phoneShort: "Numero troppo corto",
-    required: "Obbligatorio", genericError: "!",
+    required: "Obbligatorio", genericError: "Si è verificato un errore imprevisto.", // AGGIORNATO
     alreadyRegistered: "Questa email è già registrata.",
     profileError: "Errore salvataggio profilo: ",
     patientExists: "Paziente già presente in archivio.",
@@ -237,6 +304,7 @@ export const it = {
     networkError: "Errore di rete",
     fileNotFound: "Impossibile trovare il file nello storage.",
     fileRetrievalError: "Impossibile recuperare il file",
-    credentialsInvalid: "Credenziali non valide"
+    credentialsInvalid: "Credenziali non valide",
+    linkSent: "Link inviato correttamente" // AGGIUNTO
   }
 }

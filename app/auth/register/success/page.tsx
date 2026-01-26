@@ -1,36 +1,34 @@
-'use client'
+import Link from 'next/link'
+import { MailCheck } from 'lucide-react'
+import { getDictionary } from '@/lib/dictionary'
 
-import { useEffect } from 'react'
-import { useRouter } from 'next/navigation'
-import { CheckCircle2, Loader2 } from 'lucide-react'
-import { dictionary } from '@/lib/dictionary'
-
-export default function RegisterSuccessPage() {
-  const router = useRouter()
-  const t = dictionary.auth.register.success;
-  const loginSuccessMsg = dictionary.auth.login.successRedirect;
-
-  useEffect(() => {
-    // mostra la pagina per 3 secondi, poi ti porta alla pagina di login
-    const timer = setTimeout(() => {
-      router.push(`/auth/login?success=${encodeURIComponent(loginSuccessMsg)}`)
-    }, 3000)
-    return () => clearTimeout(timer)
-  }, [router, loginSuccessMsg])
+export default async function RegisterSuccessPage() {
+  const dict = await getDictionary()
+  const t = dict.auth.register.success
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-white p-4 text-center">
-      <div className="w-16 h-16 bg-green-100 text-green-600 rounded-full flex items-center justify-center mb-6 animate-bounce">
-        <CheckCircle2 className="w-8 h-8" />
-      </div>
-      <h1 className="text-3xl font-bold text-gray-900 mb-2">{t.title}</h1>
-      <p className="text-gray-500 max-w-md mb-8">
-        {t.desc}
-      </p>
-      
-      <div className="flex items-center gap-2 text-sm text-gray-400">
-        <Loader2 className="w-4 h-4 animate-spin" />
-        {t.redirect}
+    <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
+      <div className="max-w-md w-full bg-white rounded-2xl shadow-sm border border-gray-100 p-8 text-center animate-in fade-in zoom-in-95 duration-300">
+        <div className="w-16 h-16 bg-blue-50 rounded-full flex items-center justify-center mx-auto mb-6">
+          <MailCheck className="w-8 h-8 text-blue-600" />
+        </div>
+        
+        <h1 className="text-2xl font-bold text-gray-900 mb-2">{t.title}</h1>
+        
+        <p className="text-gray-600 mb-8 leading-relaxed">
+          {t.desc}
+        </p>
+
+        <div className="bg-gray-50 p-4 rounded-xl border border-gray-100 mb-8 text-sm text-gray-500">
+          {t.spamNotice}
+        </div>
+
+        <Link 
+          href="/auth/login" 
+          className="inline-flex items-center justify-center w-full px-4 py-3.5 text-sm font-bold text-white bg-black rounded-xl hover:bg-gray-800 transition-all shadow-lg"
+        >
+          {t.backToLogin}
+        </Link>
       </div>
     </div>
   )

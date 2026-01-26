@@ -3,11 +3,11 @@
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
+import { createClient as createSupabaseAdmin } from '@supabase/supabase-js' 
 import { PasswordSchema } from '@/lib/schemas'
-import { dictionary } from '@/lib/dictionary'
+import { dictionary } from '@/lib/dictionary' 
+import { headers } from 'next/headers'
 
-// stabilisce lo stato di una registrazione, iniziale, con successo o errore, in caso di errore, ad esempio, 
-// restituisce i dati ricevuti cosi come sono, così che l'utente non debba riscriverli
 export type SignupState = {
   status: 'idle' | 'success' | 'error';
   errors?: { [key: string]: string };
@@ -15,48 +15,50 @@ export type SignupState = {
   inputs?: any;
 }
 
-// funzione di login
 export async function login(formData: FormData) {
-  // connessione al db
   const supabase = await createClient()
   const data = {
     email: formData.get('email') as string,
     password: formData.get('password') as string,
   }
-  // tenta il sign in con le credenziali ricevute
+  
   const { error } = await supabase.auth.signInWithPassword(data)
-  // in caso di errore ti riporta al login con url di errore
+  
   if (error) redirect(`/auth/login?error=${encodeURIComponent(dictionary.validation.credentialsInvalid)}`)
 
   revalidatePath('/', 'layout')
   redirect('/dashboard')
 }
 
-// funzione di registrazione
 export async function signup(prevState: SignupState, formData: FormData): Promise<SignupState> {
-  // connessione al db
   const supabase = await createClient()
-  // prende i dati inseriti nel form
   const rawData = Object.fromEntries(formData)
   const password = formData.get('password') as string
+  const origin = (await headers()).get('origin')
 
-  // controllo se la pass rispetta le regole, senno restituisco errore e i dati inseriti inizialmente
+
   const passCheck = PasswordSchema.safeParse(password)
   if (!passCheck.success) {
      return { status: 'error', errors: { password: passCheck.error.issues[0].message }, inputs: rawData }
   }
 
-  // ricostruzione data di nascita
-  const day = formData.get('dob_day')
-  const month = formData.get('dob_month')
-  const year = formData.get('dob_year')
-  const fullDob = `${year}-${month}-${day}` 
+  let fullDob = formData.get('dob') as string;
   
+  if (!fullDob || fullDob.length < 10) {
+      const day = formData.get('dob_day')
+      const month = formData.get('dob_month')
+      const year = formData.get('dob_year')
+      
+      if (!year || !month || !day) {
+          return { status: 'error', message: "Data di nascita incompleta.", inputs: rawData }
+      }
+      fullDob = `${year}-${month}-${day}`
+  }
+
   const phoneFull = formData.get('phone') 
     ? `${formData.get('phonePrefix')} ${formData.get('phone')}`
     : null;
 
-  // inserisco nell'oggetto userdata i dati del form per poi passarlo al db
   const userData = {
     email: formData.get('email') as string,
     password: password,
@@ -65,7 +67,7 @@ export async function signup(prevState: SignupState, formData: FormData): Promis
     fiscalCode: (formData.get('fiscalCode') as string).toUpperCase(),
     medicalLicense: formData.get('medicalLicense') as string,
     hospitalName: formData.get('hospitalName') as string,
-    dob: fullDob, 
+    dob: fullDob,
     placeOfBirth: formData.get('placeOfBirth') as string,
     gender: formData.get('gender') as string,
     addressStreet: formData.get('addressStreet') as string,
@@ -77,24 +79,40 @@ export async function signup(prevState: SignupState, formData: FormData): Promis
     phone: phoneFull
   }
 
-  // tento la registrazione delle credenziali dell'utente
+
   const { data: authData, error: authError } = await supabase.auth.signUp({
     email: userData.email,
     password: userData.password,
+    options: {
+        emailRedirectTo: `${origin}/auth/callback`,
+        data: {
+             first_name: userData.firstName,
+             last_name: userData.lastName
+        }
+    }
   })
 
-  // se restituisce errore, lo mostro (mail già registrata come errore previsto/conosciuto)
   if (authError) {
     let fieldErrors: any = {}
     if (authError.message.includes('already registered') || authError.status === 422) {
-        fieldErrors.email = dictionary.validation.alreadyRegistered
+        fieldErrors.email = "Email già registrata." 
     }
     return { status: 'error', message: authError.message, errors: fieldErrors, inputs: rawData }
   }
 
-  // verificate le condizioni precedenti, inserisco i dati del dottore nel db
   if (authData.user) {
-    const { error: profileError } = await supabase.from('profiles').insert({
+    const supabaseAdmin = createSupabaseAdmin(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!, 
+      {
+        auth: {
+          autoRefreshToken: false,
+          persistSession: false
+        }
+      }
+    )
+
+    const { error: profileError } = await supabaseAdmin.from('profiles').insert({
       id: authData.user.id,
       email: userData.email,
       first_name: userData.firstName,
@@ -115,25 +133,57 @@ export async function signup(prevState: SignupState, formData: FormData): Promis
       phone_number: userData.phone
     })
     
-    // in caso contrario, ritorniamo errore
     if (profileError) {
-        return { status: 'error', message: dictionary.validation.profileError + profileError.message, inputs: rawData }
+        console.error("Errore creazione profilo:", profileError)
+
+        await supabaseAdmin.auth.admin.deleteUser(authData.user.id)
+        
+        return { status: 'error', message: "Errore dati profilo: " + profileError.message, inputs: rawData }
     }
   }
 
-  // logout per reindirizzarti prima alla pagina di success
   await supabase.auth.signOut()
 
   redirect('/auth/register/success')
 }
 
-// funzione di logout
 export async function signout() {
-  // connessione al db
   const supabase = await createClient()
-  // logout
   await supabase.auth.signOut()
-  // redirect al login
   revalidatePath('/', 'layout')
   redirect('/auth/login')
+}
+
+export async function resetPassword(formData: FormData) {
+    const supabase = await createClient()
+    const email = formData.get('email') as string
+    const origin = (await headers()).get('origin')
+
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${origin}/auth/update-password`,
+    })
+
+    if (error) {
+        redirect(`/auth/forgot-password?error=${encodeURIComponent("Si è verificato un errore.")}`)
+    }
+
+    redirect('/auth/forgot-password?success=true')
+}
+
+export async function updatePassword(formData: FormData) {
+    const supabase = await createClient()
+    const password = formData.get('password') as string
+    const confirmPassword = formData.get('confirmPassword') as string
+
+    if (password !== confirmPassword) {
+        redirect(`/auth/update-password?error=${encodeURIComponent("Le password non coincidono.")}`)
+    }
+
+    const { error } = await supabase.auth.updateUser({ password })
+
+    if (error) {
+        redirect(`/auth/update-password?error=${encodeURIComponent(error.message)}`)
+    }
+
+    redirect('/dashboard')
 }

@@ -8,7 +8,6 @@ import { DateOfBirthPicker } from '@/components/ui/DateOfBirthPicker'
 import { ValidatedInput, GlobalLocationSelector } from '@/components/ui/FormElements'
 import { REGEX_VALIDATORS } from '@/lib/constants'
 
-// Props interface
 interface ModalProps {
     dict: any
 }
@@ -26,6 +25,9 @@ function SubmitButton({ dict }: { dict: any }) {
 export function AddPatientModal({ dict }: ModalProps) {
   const [isOpen, setIsOpen] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  
+  const [dob, setDob] = useState<Date | undefined>(undefined)
+
   const t = dict.dashboard.patients.modal;
   const tf = dict.auth.form;
   const tPatients = dict.dashboard.patients.empty;
@@ -37,6 +39,7 @@ export function AddPatientModal({ dict }: ModalProps) {
      if(res?.success) {
         setIsOpen(false);
         setError(null);
+        setDob(undefined);
      }
      
      if(res?.error) {
@@ -97,7 +100,17 @@ export function AddPatientModal({ dict }: ModalProps) {
 
             <div className="space-y-1">
                  <label className="text-xs font-bold text-gray-500 uppercase tracking-wider ml-1">{tf.labels.dob} *</label>
-                 <DateOfBirthPicker name="dob" dict={dict} />
+                 
+                 <DateOfBirthPicker 
+                    date={dob} 
+                    setDate={setDob}
+                    labels={{
+                        day: tf.placeholders.day,
+                        month: tf.placeholders.month,
+                        year: tf.placeholders.year
+                    }}
+                 />
+                 <input type="hidden" name="dob" value={dob ? dob.toISOString().split('T')[0] : ''} />
             </div>
             
             <ValidatedInput name="placeOfBirth" label={tf.labels.birthPlace} placeholder={tf.placeholders.city} required />

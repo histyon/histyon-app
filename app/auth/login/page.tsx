@@ -27,7 +27,6 @@ export default async function LoginPage(props: {
   return (
     <div className="min-h-screen flex w-full bg-white font-sans text-gray-900">
       
-      {/* Passiamo il dizionario alla Sidebar */}
       <AuthSidebar dict={dict} />
 
       <div className="flex-1 flex flex-col items-center justify-center p-6 relative">
@@ -38,14 +37,14 @@ export default async function LoginPage(props: {
           </div>
 
           {error && (
-            <div className="mb-6 bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-xl text-sm flex items-center gap-3 shadow-sm">
+            <div className="mb-6 bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-xl text-sm flex items-center gap-3 shadow-sm animate-in fade-in slide-in-from-top-2">
               <AlertCircle className="w-5 h-5 flex-shrink-0" />
               <p>{error}</p>
             </div>
           )}
 
           {success && (
-            <div className="mb-6 bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-xl text-sm flex items-center gap-3 shadow-sm">
+            <div className="mb-6 bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-xl text-sm flex items-center gap-3 shadow-sm animate-in fade-in slide-in-from-top-2">
               <CheckCircle2 className="w-5 h-5 flex-shrink-0" />
               <p>{success}</p>
             </div>
@@ -58,12 +57,23 @@ export default async function LoginPage(props: {
                 label={tf.labels.emailSimple}
                 required 
             />
-            <ValidatedInput 
-                name="password" 
-                type="password" 
-                label={tf.labels.passwordSimple}
-                required 
-            />
+            
+            <div className="space-y-1">
+                <ValidatedInput 
+                    name="password" 
+                    type="password" 
+                    label={tf.labels.passwordSimple}
+                    required 
+                />
+                <div className="flex justify-end">
+                    <Link 
+                        href="/auth/forgot-password" 
+                        className="text-xs font-semibold text-gray-500 hover:text-black transition-colors"
+                    >
+                        {t.forgotPassword}
+                    </Link>
+                </div>
+            </div>
             
             <button formAction={login} className="w-full bg-black text-white py-4 rounded-xl font-bold hover:bg-gray-800 transition-all shadow-lg mt-4">
               {t.btn}

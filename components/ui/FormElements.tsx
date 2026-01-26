@@ -1,190 +1,280 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import { COUNTRY_MAP } from '@/lib/constants'
-import { Loader2, ChevronDown } from 'lucide-react'
+import React, { useState, useEffect, useRef, createContext, useContext } from 'react'
+import { Eye, EyeOff, Loader2, AlertCircle, CheckCircle2, ChevronDown, Check } from 'lucide-react'
+import { COUNTRY_MAP, ITALIAN_PROVINCES } from '@/lib/constants'
 
-// --- Componente ValidatedInput ---
-export function ValidatedInput({ 
-    name, 
-    label, 
-    type = "text", 
-    required = false, 
-    pattern, 
-    errorMessage, 
-    className = "", 
-    placeholder = "",
-    defaultValue,
-    externalError,
-    maxLength
-}: { 
-    name: string, 
-    label: string, 
-    type?: string, 
-    required?: boolean, 
-    pattern?: string, 
-    errorMessage?: string,
-    className?: string,
-    placeholder?: string,
-    defaultValue?: any,
-    externalError?: string,
-    maxLength?: number
-}) {
-    const [touched, setTouched] = useState(false)
-    const [value, setValue] = useState(defaultValue || "")
-    const [error, setError] = useState("")
-
-    useEffect(() => {
-        if (externalError) {
-            setError(externalError)
-            setTouched(true)
-        }
-    }, [externalError])
-
-    // FIX: Aggiunto tipo esplicito (val: string) per risolvere errore ts(7006)
-    const validate = (val: string) => {
-        if (required && !val) return "Campo obbligatorio"
-        if (pattern && !new RegExp(pattern).test(val)) return errorMessage || "Formato non valido"
-        return ""
-    }
-
-    const handleBlur = () => {
-        setTouched(true)
-        setError(validate(value))
-    }
-
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        setValue(e.target.value)
-        if (touched) setError(validate(e.target.value))
-    }
-
+export interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {}
+export const Input = React.forwardRef<HTMLInputElement, InputProps>(
+  ({ className, type, ...props }, ref) => {
     return (
-        <div className="relative">
-            <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5 ml-1">
-                {label} {required && "*"}
-            </label>
-            <input 
-                name={name}
-                type={type}
-                required={required}
-                placeholder={placeholder}
-                value={value}
-                maxLength={maxLength}
-                onChange={handleChange}
-                onBlur={handleBlur}
-                className={`
-                    w-full px-4 py-3 bg-white border rounded-xl outline-none transition-all
-                    placeholder:text-gray-300
-                    ${error ? 'border-red-300 focus:border-red-500 focus:ring-4 focus:ring-red-50 text-red-900' : 'border-gray-200 focus:border-black focus:ring-4 focus:ring-gray-100 text-gray-900'}
-                    ${className}
-                `}
-            />
-            {error && <p className="text-xs text-red-500 mt-1.5 font-medium ml-1 flex items-center gap-1 animate-in slide-in-from-top-1">{error}</p>}
-        </div>
+      <input
+        type={type}
+        className={`flex h-12 w-full rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm ring-offset-white file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-gray-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black focus-visible:ring-inset disabled:cursor-not-allowed disabled:opacity-50 ${className}`}
+        ref={ref}
+        {...props}
+      />
     )
-}
+  }
+)
+Input.displayName = "Input"
 
-// --- Componente GlobalLocationSelector (HTML Standard) ---
-export function GlobalLocationSelector({ dict }: { dict: any }) {
-  const [selectedCountryCode, setSelectedCountryCode] = useState('IT') 
-  const [regions, setRegions] = useState<{ name: string }[]>([])
-  const [loadingRegions, setLoadingRegions] = useState(false)
-  
-  // Fallback sicuro se dict non è caricato
-  const t = dict?.auth?.form || { labels: {}, placeholders: {}, warnings: {} };
+interface SelectContextType {
+  value: string
+  onChange: (value: string) => void
+  open: boolean
+  setOpen: (open: boolean) => void
+}
+const SelectContext = createContext<SelectContextType | undefined>(undefined)
+
+export function Select({ children, value, onValueChange, defaultValue, name }: { children: React.ReactNode, value?: string, onValueChange?: (val: string) => void, defaultValue?: string, name?: string }) {
+  const [internalValue, setInternalValue] = useState(defaultValue || "")
+  const [open, setOpen] = useState(false)
+  const containerRef = useRef<HTMLDivElement>(null)
+
+  const handleValueChange = (val: string) => {
+    setInternalValue(val)
+    if (onValueChange) onValueChange(val)
+    setOpen(false)
+  }
 
   useEffect(() => {
-    if (!selectedCountryCode) return
-    setLoadingRegions(true)
-    fetch(`https://raw.githubusercontent.com/dr5hn/countries-states-cities-database/master/states.json`)
-      .then(res => res.json())
-      .then((data: any[]) => {
-         const countryStates = data.filter((s: any) => s.country_code === selectedCountryCode)
-         setRegions(countryStates)
-      })
-      .catch(() => setRegions([]))
-      .finally(() => setLoadingRegions(false))
+    const handleClickOutside = (event: MouseEvent) => {
+      if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
+        setOpen(false)
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside)
+    return () => document.removeEventListener("mousedown", handleClickOutside)
+  }, [])
+
+  const currentValue = value !== undefined ? value : internalValue
+
+  return (
+    <SelectContext.Provider value={{ value: currentValue, onChange: handleValueChange, open, setOpen }}>
+      <div className="relative w-full" ref={containerRef}>
+        {children}
+        {name && <input type="hidden" name={name} value={currentValue} />}
+      </div>
+    </SelectContext.Provider>
+  )
+}
+
+export function SelectTrigger({ children, className }: { children: React.ReactNode, className?: string }) {
+  const ctx = useContext(SelectContext)
+  if (!ctx) throw new Error("SelectTrigger must be used within Select")
+  return (
+    <button type="button" onClick={() => ctx.setOpen(!ctx.open)} className={`flex w-full items-center justify-between rounded-xl border border-gray-200 bg-white px-3 py-3 text-sm ring-offset-white placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-black focus:ring-inset disabled:cursor-not-allowed disabled:opacity-50 ${className}`}>
+      {children}
+      <ChevronDown className="h-4 w-4 opacity-50" />
+    </button>
+  )
+}
+
+export function SelectValue({ placeholder }: { placeholder?: string }) {
+  return <span className="pointer-events-none">{placeholder}</span>
+}
+
+export function SelectContent({ children, className }: { children: React.ReactNode, className?: string }) {
+  const ctx = useContext(SelectContext)
+  if (!ctx || !ctx.open) return null
+  return (
+    <div className={`absolute top-full left-0 mt-1 w-full min-w-[8rem] overflow-hidden rounded-xl border border-gray-200 bg-white text-gray-950 shadow-md animate-in fade-in-80 zoom-in-95 z-50 ${className}`}>
+      <div className="p-1 max-h-[300px] overflow-y-auto custom-scrollbar">{children}</div>
+    </div>
+  )
+}
+
+export function SelectItem({ value, children, className }: { value: string, children: React.ReactNode, className?: string }) {
+  const ctx = useContext(SelectContext)
+  if (!ctx) throw new Error("SelectItem must be used within Select")
+  const isSelected = ctx.value === value
+  return (
+    <div onClick={() => ctx.onChange(value)} className={`relative flex w-full cursor-default select-none items-center rounded-lg py-1.5 pl-2 pr-8 text-sm outline-none hover:bg-gray-100 focus:bg-gray-100 focus:text-gray-900 data-[disabled]:pointer-events-none data-[disabled]:opacity-50 cursor-pointer ${className} ${isSelected ? 'bg-gray-50 font-medium' : ''}`}>
+      <span className="absolute right-2 flex h-3.5 w-3.5 items-center justify-center">{isSelected && <Check className="h-4 w-4" />}</span>
+      <span className="truncate w-full">{children}</span>
+    </div>
+  )
+}
+
+interface ValidatedInputProps extends React.InputHTMLAttributes<HTMLInputElement> {
+  label?: string
+  pattern?: string 
+  errorMessage?: string
+  externalError?: string 
+}
+
+export function ValidatedInput({ label, type, pattern, errorMessage, externalError, className, ...props }: ValidatedInputProps) {
+  const [value, setValue] = useState(props.defaultValue || '')
+  const [touched, setTouched] = useState(false)
+  const [showPassword, setShowPassword] = useState(false)
+
+  useEffect(() => {
+    if (props.defaultValue !== undefined) setValue(props.defaultValue)
+  }, [props.defaultValue])
+
+  useEffect(() => {
+    if (externalError) setTouched(true)
+  }, [externalError])
+
+  const patternCheck = pattern && String(value).length > 0 ? new RegExp(pattern).test(String(value)) : true
+  
+  const requiredCheck = props.required ? String(value).trim().length > 0 : true;  
+  
+  const isValid = patternCheck && requiredCheck && !externalError
+  const isError = touched && !isValid
+  
+  const isSuccess = touched && isValid && String(value).length > 0 && type !== 'password'
+  
+  const inputType = type === 'password' ? (showPassword ? 'text' : 'password') : type
+  const borderClass = isError ? 'border-red-500 focus-visible:ring-red-200 bg-red-50/10' : isSuccess ? 'border-green-500 focus-visible:ring-green-200 bg-green-50/10' : 'border-gray-200 focus-visible:ring-gray-200'
+  const displayError = externalError || (isError ? errorMessage : null)
+
+  return (
+    <div className="w-full">
+      {label && <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5 ml-1">{label} {props.required && <span className="text-red-500">*</span>}</label>}
+      <div className="relative group">
+        <Input 
+          {...props} 
+          type={inputType} 
+          className={`pr-10 ${borderClass} ${className || ''} focus-visible:ring-2 focus-visible:ring-inset transition-all duration-200`} 
+          onBlur={() => setTouched(true)} 
+          onChange={(e) => { 
+            setValue(e.target.value); 
+            if (props.onChange) props.onChange(e) 
+          }} 
+        />
+        {type === 'password' && <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 p-2 text-gray-400 hover:text-black transition-colors rounded-full hover:bg-gray-100" tabIndex={-1}>{showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}</button>}
+        {type !== 'password' && isError && <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none"><AlertCircle className="w-4 h-4 text-red-500" /></div>}
+        {type !== 'password' && isSuccess && <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none"><CheckCircle2 className="w-4 h-4 text-green-500" /></div>}
+      </div>
+      {displayError && touched && !isValid && <p className="text-[11px] font-medium text-red-600 mt-1.5 ml-1 flex items-center gap-1 animate-in slide-in-from-top-1">• {displayError}</p>}
+    </div>
+  )
+}
+
+interface LocationDefaults {
+    country?: string
+    addressStreet?: string
+    addressCivic?: string
+    postalCode?: string
+    city?: string
+    region?: string
+}
+
+export function GlobalLocationSelector({ defaults, dict }: { defaults?: LocationDefaults, dict?: any }) {
+  const [selectedCountryCode, setSelectedCountryCode] = useState(() => {
+      if (defaults?.country) {
+          const c = COUNTRY_MAP.find(x => x.name === defaults.country);
+          if (c) return c.code;
+      }
+      return 'IT';
+  });
+  
+  const [selectedRegion, setSelectedRegion] = useState(defaults?.region || "");
+  const [regions, setRegions] = useState<{ name: string }[]>([])
+  const [loadingRegions, setLoadingRegions] = useState(false)
+
+  const t = dict?.auth?.form || { labels: { country: "Paese", address: "Indirizzo", civic: "Civico", zip: "CAP", city: "Città", province: "Provincia" }, placeholders: {}, warnings: { required: "Obbligatorio", loading: "Caricamento..." } };
+
+  useEffect(() => {
+    async function fetchRegions() {
+      if (!selectedCountryCode) {
+        setRegions([])
+        return
+      }
+
+      if (selectedCountryCode === 'IT') {
+          setRegions(ITALIAN_PROVINCES.map(p => ({ name: p })))
+          return
+      }
+
+      setLoadingRegions(true)
+      try {
+        const response = await fetch('https://countriesnow.space/api/v0.1/countries/states', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ iso2: selectedCountryCode })
+        })
+        const data = await response.json()
+        if (!data.error && data.data.states) setRegions(data.data.states)
+        else setRegions([])
+      } catch (err) {
+        console.error(err)
+        setRegions([])
+      } finally {
+        setLoadingRegions(false)
+      }
+    }
+    fetchRegions()
   }, [selectedCountryCode])
 
   return (
     <div className="space-y-4">
-        {/* SELEZIONE PAESE */}
         <div className="relative">
-            <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5 ml-1">
-                {t.labels.country} *
-            </label>
-            <div className="relative">
-                <select 
-                    name="country"
-                    defaultValue="Italia"
-                    onChange={(e) => {
-                        const val = e.target.value;
-                        const country = COUNTRY_MAP.find(c => c.name === val)
-                        if (country) setSelectedCountryCode(country.code)
-                    }}
-                    className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl outline-none appearance-none cursor-pointer focus:border-black focus:ring-4 focus:ring-gray-100 transition-all text-gray-900 pr-10"
-                >
+            <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5 ml-1">{t.labels.country} *</label>
+            <Select 
+                name="country" 
+                defaultValue={defaults?.country || "Italia"}
+                onValueChange={(val) => {
+                    const country = COUNTRY_MAP.find(c => c.name === val)
+                    if (country) setSelectedCountryCode(country.code)
+                    setSelectedRegion("") 
+                }}
+            >
+                <SelectTrigger className="h-12">
+                   <span className="truncate">{COUNTRY_MAP.find(c => c.code === selectedCountryCode)?.name || "Seleziona"}</span>
+                </SelectTrigger>
+                <SelectContent>
                     {COUNTRY_MAP.map(c => (
-                        <option key={c.code} value={c.name}>{c.name}</option>
+                        <SelectItem key={c.code} value={c.name}>{c.name}</SelectItem>
                     ))}
-                </select>
-                <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400">
-                    <ChevronDown className="w-4 h-4" />
-                </div>
-            </div>
+                </SelectContent>
+            </Select>
         </div>
         
         <div className="grid grid-cols-4 gap-4">
              <div className="col-span-3">
-                <ValidatedInput name="addressStreet" label={t.labels.address} placeholder={t.placeholders.address} required errorMessage={t.warnings.required} />
+                <ValidatedInput name="addressStreet" defaultValue={defaults?.addressStreet} label={t.labels.address} placeholder={t.placeholders.address} required errorMessage={t.warnings.required} />
              </div>
              <div className="col-span-1">
-                <ValidatedInput name="addressCivic" label={t.labels.civic} placeholder={t.placeholders.civic} required errorMessage="!" />
+                <ValidatedInput name="addressCivic" defaultValue={defaults?.addressCivic} label={t.labels.civic} placeholder={t.placeholders.civic} required errorMessage="!" />
              </div>
         </div>
 
         <div className="grid grid-cols-6 gap-4">
             <div className="col-span-2">
-                 <ValidatedInput name="postalCode" label={t.labels.zip} placeholder={t.placeholders.zip} required errorMessage={t.warnings.required} />
+                 <ValidatedInput name="postalCode" defaultValue={defaults?.postalCode} label={t.labels.zip} placeholder={t.placeholders.zip} required errorMessage={t.warnings.required} />
             </div>
             <div className="col-span-2">
-                 <ValidatedInput name="city" label={t.labels.city} placeholder={t.placeholders.municipality} required errorMessage={t.warnings.required} />
+                 <ValidatedInput name="city" defaultValue={defaults?.city} label={t.labels.city} placeholder={t.placeholders.municipality} required errorMessage={t.warnings.required} />
             </div>
-            
-            {/* SELEZIONE PROVINCIA */}
             <div className="col-span-2 relative">
-                 <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5 ml-1">
-                    {t.labels.province} *
-                 </label>
+                 <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5 ml-1">{t.labels.province} *</label>
+                 
                  {loadingRegions ? (
                     <div className="w-full px-4 py-3 border border-gray-100 rounded-xl bg-gray-50 flex items-center text-gray-400 text-xs h-12">
                         <Loader2 className="w-3 h-3 animate-spin mr-2" /> {t.warnings.loading}
                     </div>
                  ) : regions.length > 0 ? (
-                    <div className="relative">
-                        <select 
-                            name="region" 
-                            defaultValue=""
-                            className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl outline-none appearance-none cursor-pointer focus:border-black focus:ring-4 focus:ring-gray-100 transition-all text-gray-900 pr-10"
-                        >
-                            <option value="" disabled>{t.placeholders.select}</option>
-                            {regions.map((r, idx) => (
-                                <option key={idx} value={r.name.replace('Province of ', '')}>
-                                    {r.name.replace('Province of ', '')}
-                                </option>
-                            ))}
-                        </select>
-                        <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400">
-                            <ChevronDown className="w-4 h-4" />
-                        </div>
-                    </div>
-                 ) : (
-                    <input 
+                    <Select 
                         name="region" 
-                        placeholder={t.placeholders.province} 
-                        required 
-                        className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl outline-none focus:border-black focus:ring-4 focus:ring-gray-100 transition-all placeholder:text-gray-300"
-                    />
+                        defaultValue={selectedRegion}
+                        value={selectedRegion} 
+                        onValueChange={setSelectedRegion}
+                    >
+                        <SelectTrigger className="h-12">
+                             <span className="truncate">{selectedRegion || t.placeholders.select || "Seleziona"}</span>
+                        </SelectTrigger>
+                        <SelectContent>
+                            {regions.map((r, idx) => {
+                                const val = r.name.replace('Province of ', '')
+                                return <SelectItem key={idx} value={val}>{val}</SelectItem>
+                            })}
+                        </SelectContent>
+                    </Select>
+                 ) : (
+                    <Input name="region" defaultValue={defaults?.region} placeholder={t.placeholders.province} required />
                  )}
             </div>
         </div>
@@ -192,30 +282,54 @@ export function GlobalLocationSelector({ dict }: { dict: any }) {
   )
 }
 
-// --- Componente PhoneInput ---
-export function PhoneInput({ label }: { label: string }) {
+export function PhoneInput({ label, defaultValue }: { label: string, defaultValue?: string }) {
+    const parseValue = (val?: string) => {
+        const parts = val ? val.split(' ') : [];
+        return {
+            prefix: parts.length > 1 ? parts[0] : '+39',
+            number: parts.length > 1 ? parts.slice(1).join(' ') : (val || '')
+        };
+    };
+
+    const initial = parseValue(defaultValue);
+    const [prefix, setPrefix] = useState(initial.prefix);
+
+    useEffect(() => {
+        const updated = parseValue(defaultValue);
+        setPrefix(updated.prefix);
+    }, [defaultValue]);
+
+    const currentCountry = COUNTRY_MAP.find(c => c.dial_code === prefix) || COUNTRY_MAP.find(c => c.code === 'IT');
+
     return (
         <div className="relative">
-            <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5 ml-1">
-                {label}
-            </label>
-            <div className="flex gap-3">
-                <div className="w-24">
-                   <input 
-                      name="phonePrefix" 
-                      defaultValue="+39" 
-                      className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl text-center font-bold text-gray-500 focus:border-black focus:ring-4 focus:ring-gray-100 outline-none"
-                   />
+            <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5 ml-1">{label}</label>
+            <div className="flex gap-2">
+                <div className="w-[100px] relative">
+                    <span className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none z-10">
+                        {currentCountry?.flag}
+                    </span>
+                    <select 
+                        name="phonePrefix"
+                        value={prefix}
+                        onChange={(e) => setPrefix(e.target.value)}
+                        className="w-full h-12 pl-10 pr-2 bg-white border border-gray-200 rounded-xl text-sm font-bold appearance-none focus:ring-2 focus:ring-black focus:ring-inset outline-none cursor-pointer"
+                    >
+                        {COUNTRY_MAP.map((c) => (
+                            <option key={c.code} value={c.dial_code}>{c.dial_code} ({c.code})</option>
+                        ))}
+                    </select>
                 </div>
                 <div className="flex-1">
-                    <input 
+                    <Input 
+                        key={defaultValue} 
                         name="phone" 
                         type="tel" 
-                        placeholder="333 1234567"
-                        className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl outline-none focus:border-black focus:ring-4 focus:ring-gray-100 transition-all placeholder:text-gray-300"
+                        defaultValue={initial.number} 
+                        placeholder="333 1234567" 
                     />
                 </div>
             </div>
         </div>
-    )
+    );
 }

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useActionState } from 'react'
+import { useState, useActionState, useEffect } from 'react'
 import { signup, SignupState } from '@/lib/actions/auth'
 import { ValidatedInput, GlobalLocationSelector, PhoneInput } from '@/components/ui/FormElements'
 import { DateOfBirthPicker } from '@/components/ui/DateOfBirthPicker'
@@ -16,6 +16,14 @@ interface RegisterFormProps {
 export function RegisterForm({ dict }: RegisterFormProps) {
   const [state, formAction] = useActionState(signup, initialState)
   const [currentStep, setCurrentStep] = useState(1)
+  
+  const [dob, setDob] = useState<Date | undefined>(
+    state.inputs?.dob ? new Date(state.inputs.dob) : undefined
+  )
+
+  useEffect(() => {
+    if (state.inputs?.dob) setDob(new Date(state.inputs.dob))
+  }, [state.inputs?.dob])
   
   const t = dict.auth.register;
   const tf = dict.auth.form;
@@ -102,7 +110,17 @@ export function RegisterForm({ dict }: RegisterFormProps) {
                 
                 <div className="space-y-1">
                     <label className="text-xs font-bold text-gray-500 uppercase tracking-wider ml-1">{tf.labels.dob} *</label>
-                    <DateOfBirthPicker name="dob" dict={dict} />
+                    
+                    <DateOfBirthPicker 
+                        date={dob} 
+                        setDate={setDob}
+                        labels={{
+                            day: tf.placeholders.day,
+                            month: tf.placeholders.month,
+                            year: tf.placeholders.year
+                        }}
+                    />
+                    <input type="hidden" name="dob" value={dob ? dob.toISOString().split('T')[0] : ''} />
                 </div>
 
                 <ValidatedInput 

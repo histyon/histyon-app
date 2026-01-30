@@ -54,8 +54,8 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(new URL('/auth/login', request.url))
   }
   if (user && request.nextUrl.pathname.startsWith('/auth')) {
-    if (!request.nextUrl.pathname.includes('/verified') && !request.nextUrl.pathname.includes('/success')) {
-        return NextResponse.redirect(new URL('/dashboard', request.url))
+    if (!request.nextUrl.pathname.includes('/verified')) {
+       return NextResponse.redirect(new URL('/dashboard', request.url))
     }
   }
   return response

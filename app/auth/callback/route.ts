@@ -13,9 +13,8 @@ export async function GET(request: Request) {
     const { error } = await supabase.auth.exchangeCodeForSession(code)
     
     if (!error) {
-      return NextResponse.redirect(`${origin}/auth/register/success`) 
+      return NextResponse.redirect(`${origin}/auth/verified`)
     }
   }
-
-  return NextResponse.redirect(`${origin}/auth/login?error=${encodeURIComponent(dict.auth.login.linkInvalid)}`)
+  return NextResponse.redirect(`${origin}/auth/verified`)
 }

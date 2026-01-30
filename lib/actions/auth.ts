@@ -79,18 +79,30 @@ export async function signup(prevState: SignupState, formData: FormData): Promis
     phone: phoneFull
   }
 
-
-  const { data: authData, error: authError } = await supabase.auth.signUp({
-    email: userData.email,
-    password: userData.password,
-    options: {
-        emailRedirectTo: `${origin}/auth/callback`,
-        data: {
-             first_name: userData.firstName,
-             last_name: userData.lastName
-        }
-    }
-  })
+const { data: authData, error: authError } = await supabase.auth.signUp({
+  email: userData.email,
+  password: userData.password,
+  options: {
+      emailRedirectTo: `${origin}/auth/callback`,
+      data: {
+        first_name: userData.firstName,
+        last_name: userData.lastName,
+        fiscal_code: userData.fiscalCode,
+        medical_license: userData.medicalLicense,
+        hospital_name: userData.hospitalName,
+        dob: userData.dob,
+        place_of_birth: userData.placeOfBirth,
+        gender: userData.gender,
+        address_street: userData.addressStreet,
+        address_civic: userData.addressCivic,
+        city: userData.city,
+        country: userData.country,
+        region: userData.region,
+        postal_code: userData.postalCode,
+        phone: userData.phone
+      }
+  }
+})
 
   if (authError) {
     let fieldErrors: any = {}

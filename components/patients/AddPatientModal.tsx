@@ -1,11 +1,11 @@
 'use client'
 
 import { useState } from 'react'
-import { Plus, X, User, MapPin, AlertCircle, Phone, Mail } from 'lucide-react'
+import { Plus, X, User, MapPin, AlertCircle, Phone } from 'lucide-react'
 import { useFormStatus } from 'react-dom'
 import { addPatient } from '@/lib/actions/patient'
 import { DateOfBirthPicker } from '@/components/ui/DateOfBirthPicker'
-import { ValidatedInput, GlobalLocationSelector } from '@/components/ui/FormElements'
+import { ValidatedInput, GlobalLocationSelector, PhoneInput } from '@/components/ui/FormElements'
 import { REGEX_VALIDATORS } from '@/lib/constants'
 
 interface ModalProps {
@@ -132,12 +132,7 @@ export function AddPatientModal({ dict }: ModalProps) {
                     errorMessage={dict.validation.emailInvalid}
                     required 
                 />
-                <ValidatedInput 
-                    name="phoneNumber" 
-                    label="Telefono" 
-                    placeholder={tf.placeholders.phonePlaceholder} 
-                    required 
-                />
+                <PhoneInput label="Telefono" />
             </div>
           </div>
 

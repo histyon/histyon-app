@@ -6,10 +6,6 @@ import { z } from 'zod'
 import { dictionary } from '@/lib/dictionary'
 import { REGEX_VALIDATORS } from '@/lib/constants'
 
-// Note: spostiamo lo schema qui dentro o lo importiamo da lib/schemas.ts
-// Per coerenza con gli altri file, se usi PatientSchema di lib/schemas, assicurati che usi il dizionario.
-// Se invece è definito localmente come nel file originale:
-
 const PatientSchema = z.object({
   firstName: z.string().min(2),
   lastName: z.string().min(2),
@@ -18,11 +14,14 @@ const PatientSchema = z.object({
   gender: z.enum(['M', 'F', 'OTHER']),
   country: z.string().optional(),
   placeOfBirth: z.string().optional(),
-  address: z.string().optional(),
+  
+  addressStreet: z.string().optional(),
+  addressCivic: z.string().optional(),
+  
   city: z.string().optional(),
   province: z.string().optional(),
   postalCode: z.string().optional(),
-  email: z.string().email(dictionary.validation.emailInvalid),
+  email: z.string().email(dictionary.validation.emailInvalid).or(z.literal('')),
   phoneNumber: z.string().min(5, dictionary.validation.phoneShort),
 })
 
@@ -41,10 +40,6 @@ export async function addPatient(prevState: any, formData: FormData) {
   const phoneNum = formData.get('phone')
   const fullPhone = phoneNum ? `${phonePrefix || '+39'} ${phoneNum}` : formData.get('phoneNumber')
 
-  const street = formData.get('addressStreet')
-  const civic = formData.get('addressCivic')
-  const fullAddress = street ? (civic ? `${street}, ${civic}` : street) : formData.get('address')
-
   const rawData = {
     firstName: formData.get('firstName'),
     lastName: formData.get('lastName'),
@@ -53,7 +48,10 @@ export async function addPatient(prevState: any, formData: FormData) {
     gender: formData.get('gender'),
     country: formData.get('country') || undefined,
     placeOfBirth: formData.get('placeOfBirth') || undefined,
-    address: fullAddress || undefined,
+    
+    addressStreet: formData.get('addressStreet') || undefined,
+    addressCivic: formData.get('addressCivic') || undefined,
+    
     city: formData.get('city') || undefined,
     province: formData.get('region') || undefined,
     postalCode: formData.get('postalCode') || undefined,
@@ -82,7 +80,10 @@ export async function addPatient(prevState: any, formData: FormData) {
     gender: validated.data.gender,
     country: validated.data.country,
     place_of_birth: validated.data.placeOfBirth,
-    address: validated.data.address,
+    
+    address_street: validated.data.addressStreet,
+    address_civic: validated.data.addressCivic,
+    
     city: validated.data.city,
     region: validated.data.province,
     postal_code: validated.data.postalCode,

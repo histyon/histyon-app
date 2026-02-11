@@ -11,17 +11,16 @@ import {
   CheckCircle2
 } from 'lucide-react'
 
-export default async function LandingPage({ params: { lang } }: { params: { lang: any } }) {
+export default async function LandingPage() {
   const dict = await getDictionary()
 
   return (
     <div className="bg-white text-gray-950 font-sans selection:bg-orange-100 selection:text-orange-900 flex flex-col min-h-screen">
       
-      <Header variant="public"/>
+      <Header variant="public" />
 
       <main className="flex-1 flex flex-col">
         
-        {/* HERO SECTION */}
         <section className="relative min-h-screen flex flex-col justify-center border-b border-gray-100 pt-20 pb-10">
           <div className="layout-container">
             <div className="max-w-4xl border-l border-gray-950/10 pl-6 md:pl-10 py-8">
@@ -48,7 +47,7 @@ export default async function LandingPage({ params: { lang } }: { params: { lang
 
                 <div className="flex flex-col sm:flex-row gap-5 shrink-0">
                    <Link 
-                    href={`/${lang}/auth/register`} 
+                    href="/auth/register" 
                     className="group flex items-center gap-3 text-lg font-medium text-gray-950 hover:text-orange-700 transition-colors"
                   >
                     <span className="border-b-2 border-gray-950 group-hover:border-orange-700 pb-0.5 transition-colors">{dict.landing.hero.cta1}</span>
@@ -56,7 +55,7 @@ export default async function LandingPage({ params: { lang } }: { params: { lang
                   </Link>
                   
                   <Link 
-                    href={`/${lang}/documentation`} 
+                    href="/documentation" 
                     className="text-lg font-medium text-gray-400 hover:text-gray-950 transition-colors"
                   >
                     {dict.landing.hero.cta2}
@@ -67,7 +66,6 @@ export default async function LandingPage({ params: { lang } }: { params: { lang
           </div>
         </section>
 
-        {/* WORKFLOW SECTION */}
         <section className="min-h-screen flex items-center py-24 bg-white">
           <div className="layout-container">
             
@@ -83,7 +81,6 @@ export default async function LandingPage({ params: { lang } }: { params: { lang
 
             <div className="grid grid-cols-1 md:grid-cols-12 gap-px bg-gray-100 border border-gray-100 shadow-sm">
               
-              {/* Feature 1 */}
               <div className="md:col-span-8 bg-white p-10 md:p-14 min-h-[400px] flex flex-col justify-between group hover:bg-gray-50/30 transition-colors">
                  <div className="flex justify-between items-start">
                     <HardDriveDownload className="w-8 h-8 text-gray-300 group-hover:text-orange-600 transition-colors" />
@@ -98,7 +95,6 @@ export default async function LandingPage({ params: { lang } }: { params: { lang
                  </div>
               </div>
 
-              {/* Feature 2 */}
               <div className="md:col-span-4 bg-white p-10 md:p-14 flex flex-col justify-between group hover:bg-gray-50/30 transition-colors">
                  <div className="flex justify-between items-start">
                     <BrainCircuit className="w-8 h-8 text-gray-300 group-hover:text-orange-600 transition-colors" />
@@ -117,7 +113,6 @@ export default async function LandingPage({ params: { lang } }: { params: { lang
                  </div>
               </div>
 
-              {/* Feature 3 */}
               <div className="md:col-span-4 bg-white p-10 md:p-14 flex flex-col justify-between group hover:bg-gray-50/30 transition-colors">
                  <div className="flex justify-between items-start">
                     <FileJson className="w-8 h-8 text-gray-300 group-hover:text-orange-600 transition-colors" />
@@ -131,7 +126,6 @@ export default async function LandingPage({ params: { lang } }: { params: { lang
                  </div>
               </div>
 
-              {/* Feature 4 */}
               <div className="md:col-span-8 bg-white p-10 md:p-14 flex flex-col md:flex-row md:items-end justify-between gap-8 group hover:bg-gray-50/30 transition-colors">
                  <div className="max-w-md">
                     <div className="flex items-center gap-3 mb-4">
@@ -153,12 +147,11 @@ export default async function LandingPage({ params: { lang } }: { params: { lang
           </div>
         </section>
 
-        {/* FINAL CTA - MINIMALIST ELEGANCE */}
         <section className="py-32 border-t border-gray-100 bg-white">
            <div className="layout-container">
              <div className="flex flex-col items-center text-center max-w-2xl mx-auto">
                 
-                <h2 className="font-serif text-5xl md:text-6xl text-gray-950 mb-6 tracking-tight">
+                <h2 className="font-serif text-5xl md:text-6xl text-gray-900 mb-6 tracking-tight">
                    {dict.landing.cta.title}
                 </h2>
                 <p className="text-lg text-gray-500 font-light mb-12">
@@ -166,7 +159,7 @@ export default async function LandingPage({ params: { lang } }: { params: { lang
                 </p>
 
                 <Link 
-                  href={`/${lang}/auth/register`} 
+                  href="/auth/register" 
                   className="group inline-flex items-center gap-3 px-8 py-3 border border-gray-950 text-gray-950 text-base font-medium rounded hover:bg-gray-950 hover:text-white transition-all duration-300"
                 >
                   <span>{dict.landing.cta.btn}</span>
@@ -183,7 +176,7 @@ export default async function LandingPage({ params: { lang } }: { params: { lang
 
       </main>
 
-      <Footer lang={lang} dict={dict} />
+      <Footer />
     </div>
   )
 }

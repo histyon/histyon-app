@@ -1,9 +1,15 @@
 import Link from 'next/link'
 import { Logo } from '@/components/ui/Logo'
+import { getDictionary } from '@/lib/dictionary'
 
-export function Footer({ lang, dict }: { lang: any, dict: any }) {
+export async function Footer() {
+  const dict = await getDictionary()
+  const t = dict.landing.footer
   const currentYear = new Date().getFullYear()
-  const t = dict.landing.footer;
+  
+  // Definiamo la lingua di default per i link (es. 'it' o 'en')
+  // Dato che la landing è nella root, impostiamo un default.
+  const lang = 'it' 
 
   return (
     <footer className="w-full border-t border-gray-100 bg-white py-12 md:py-20">

@@ -5,7 +5,6 @@ import { motion, AnimatePresence } from 'framer-motion'
 import Link from 'next/link'
 import { Logo } from '@/components/ui/Logo'
 
-// Definiamo l'interfaccia per le props
 interface AuthSidebarProps {
   dict: any
 }
@@ -13,7 +12,6 @@ interface AuthSidebarProps {
 export function AuthSidebar({ dict }: AuthSidebarProps) {
   const [index, setIndex] = useState(0)
   
-  // Accesso sicuro al dizionario
   const t = dict?.auth?.sidebar || { testimonials: [], footer: '', secure: '' };
   const testimonials = t.testimonials || [];
 

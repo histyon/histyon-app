@@ -8,52 +8,55 @@ export const es = {
   },
   landing: {
     hero: {
-      badge: "HISTYON v1.0",
-      title_line1: "Diagnóstico digital",
-      title_line2: "sin compromisos.",
-      description: "La plataforma todo en uno para el almacenamiento seguro de portaobjetos WSI y análisis morfométrico asistido.",
-      ctaAccess: "Solicitar Acceso",
-      ctaDocs: "Documentación"
+      title1: "Histopatología",
+      title2: "Cloud Native.",
+      desc: "Gestión, almacenamiento y análisis IA de portaobjetos digitales (WSI). Supera los límites del software de escritorio con una infraestructura web escalable y segura.",
+      badge1: "WSI Support",
+      badge2: "Unlimited Storage",
+      badge3: "AI Analysis",
+      cta1: "Solicitar Acceso",
+      cta2: "Saber más"
     },
     workflow: {
-      title: "Tu flujo de trabajo,",
-      title_colored: "simplemente más rápido.",
-      description: "Hemos eliminado los tiempos muertos. Carga gigabytes de datos histológicos en segundos.",
-      card_header_secure: "HIPAA SECURE",
-      card_patient_label: "PACIENTE",
-      card_patient_name: "García, Juan",
-      card_patient_id: "ID: #8492-BX",
-      card_status: "ANÁLISIS LISTO",
-      card_ai_active: "CAPA IA ACTIVA",
-      card_action_btn: "Ver Informe",
-      step1_title: "Ingesta en Nube",
-      step1_desc: "Carga directa a almacenamiento cifrado.",
-      step2_title: "Procesamiento IA",
-      step2_desc: "Análisis tisular automático.",
-      step3_title: "Informes",
-      step3_desc: "Acceso instantáneo a resultados."
+      title: "El flujo,",
+      titleColor: "digital.",
+      desc: "Una arquitectura diseñada para gestionar archivos pesados sin latencia, garantizando la máxima precisión diagnóstica.",
+      f1_label: "01 — Ingesta",
+      f1_title: "Almacenamiento Ilimitado",
+      f1_desc: "Carga directa y rápida de biopsias de varios Gigabytes. Nuestra nube elástica elimina la necesidad de costosos servidores físicos en el hospital.",
+      f2_label: "02 — Análisis",
+      f2_title: "Morfometría IA",
+      f2_desc: "La red neuronal procesa la imagen en segundo plano, identificando tejidos sanos y patológicos con métricas objetivas y reproducibles.",
+      f2_tag1: "Segmentation",
+      f2_tag2: "Classification",
+      f3_label: "03 — Informe",
+      f3_title: "Datos y QuPath",
+      f3_desc: "Obtén informes estructurados y accede directamente al proyecto QuPath preconfigurado para un análisis microscópico de segundo nivel.",
+      f4_label: "04 — Privacidad",
+      f4_title: "Seguridad de Datos",
+      f4_desc: "Aislamiento total de pacientes. Cada médico accede de forma cifrada exclusivamente a sus propios casos. Cumplimiento GDPR nativo."
     },
-    features: {
-      title: "Excelencia Clínica",
-      title_colored: "y Seguridad de Datos.",
-      subtitle: "La seguridad no es opcional. Es el fundamento de nuestra arquitectura.",
-      feat1_title: "Archivo WSI Ilimitado",
-      feat1_desc: "Espacio en la nube seguro para todos tus portaobjetos digitales.",
-      feat2_title: "Segunda Opinión",
-      feat2_desc: "Algoritmos de Deep Learning destacan áreas de interés (ROI).",
-      feat2_trusted: "Confiado por laboratorios modernos",
-      feat3_title: "Privacidad por Diseño",
-      feat3_desc: "Datos de pacientes aislados y cifrados."
+    cta: {
+      title: "¿Listo para desplegar?",
+      desc: "La infraestructura Histyon está lista. Carga el primer portaobjetos y deja que la IA haga el trabajo pesado.",
+      btn: "Crear cuenta",
+      note: "Acceso reservado a personal médico e investigadores."
     },
     footer: {
-      copyright: "Histyon. Todos los derechos reservados.",
-      legal: "Info Legal",
+      rights: "Todos los derechos reservados.",
+      credits: "Créditos",
+      dev: "Diseño Web y Desarrollo:",
+      platform: "Plataforma",
+      support: "Soporte",
+      legalSection: "Legal",
+      login: "Acceso",
+      register: "Registro",
       docs: "Documentación",
       contact: "Contacto",
-      login: "Acceso",
-      register: "Registro"
+      legal: "Info Legal"
     }
   },
+
   auth: {
     sidebar: {
       footer: "Consola Histyon \u00A9 2026",

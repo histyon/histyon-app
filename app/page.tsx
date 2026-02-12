@@ -23,20 +23,20 @@ export default async function LandingPage() {
         
         <section className="relative min-h-screen flex flex-col justify-center border-b border-gray-100 pt-20 pb-10">
           <div className="layout-container">
-            <div className="max-w-4xl border-l border-gray-950/10 pl-6 md:pl-10 py-8">
+            <div className="max-w-4xl border-l border-gray-950/10 pl-5 md:pl-10 py-8">
               
-              <h1 className="font-serif text-6xl md:text-8xl lg:text-9xl text-gray-950 mb-10 leading-[0.9] tracking-tight">
+              <h1 className="font-serif text-5xl sm:text-6xl md:text-8xl lg:text-9xl text-gray-950 mb-8 md:mb-10 leading-[0.9] tracking-tight">
                 {dict.landing.hero.title1} <br/>
                 {dict.landing.hero.title2}
               </h1>
 
-              <div className="flex flex-col md:flex-row gap-12 md:items-end justify-between">
+              <div className="flex flex-col md:flex-row gap-8 md:gap-12 md:items-end justify-between">
                 <div className="max-w-lg space-y-6">
-                  <p className="text-xl md:text-2xl text-gray-600 leading-relaxed font-light">
+                  <p className="text-lg sm:text-xl md:text-2xl text-gray-600 leading-relaxed font-light">
                     {dict.landing.hero.desc}
                   </p>
                   
-                  <p className="text-sm text-gray-400 font-mono flex flex-wrap items-center gap-4 uppercase tracking-wider">
+                  <p className="text-xs sm:text-sm text-gray-400 font-mono flex flex-wrap items-center gap-3 sm:gap-4 uppercase tracking-wider">
                      <span>{dict.landing.hero.badge1}</span>
                      <span className="w-1 h-1 bg-gray-300 rounded-full"></span>
                      <span>{dict.landing.hero.badge2}</span>
@@ -66,43 +66,43 @@ export default async function LandingPage() {
           </div>
         </section>
 
-        <section className="min-h-screen flex items-center py-24 bg-white">
+        <section className="min-h-screen flex items-center py-16 md:py-24 bg-white">
           <div className="layout-container">
             
-            <div className="mb-20 flex flex-col md:flex-row justify-between items-end gap-8">
-               <h2 className="font-serif text-5xl md:text-6xl text-gray-900 leading-none">
+            <div className="mb-12 md:mb-20 flex flex-col md:flex-row justify-between items-start md:items-end gap-6 md:gap-8">
+               <h2 className="font-serif text-4xl sm:text-5xl md:text-6xl text-gray-900 leading-none">
                  {dict.landing.workflow.title} <br/>
                  <span className="text-gray-300">{dict.landing.workflow.titleColor}</span>
                </h2>
-               <p className="text-gray-500 max-w-sm text-right font-light leading-relaxed">
+               <p className="text-gray-500 max-w-sm text-left md:text-right font-light leading-relaxed">
                  {dict.landing.workflow.desc}
                </p>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-12 gap-px bg-gray-100 border border-gray-100 shadow-sm">
               
-              <div className="md:col-span-8 bg-white p-10 md:p-14 min-h-[400px] flex flex-col justify-between group hover:bg-gray-50/30 transition-colors">
+              <div className="md:col-span-8 bg-white p-6 md:p-14 min-h-[auto] md:min-h-[400px] flex flex-col justify-between group hover:bg-gray-50/30 transition-colors">
                  <div className="flex justify-between items-start">
                     <HardDriveDownload className="w-8 h-8 text-gray-300 group-hover:text-orange-600 transition-colors" />
                     <span className="text-xs font-mono uppercase tracking-widest text-gray-400">{dict.landing.workflow.f1_label}</span>
                  </div>
                  
-                 <div className="max-w-xl mt-12">
-                    <h3 className="font-serif text-3xl md:text-4xl text-gray-900 mb-6">{dict.landing.workflow.f1_title}</h3>
-                    <p className="text-gray-500 font-light leading-relaxed text-lg">
+                 <div className="max-w-xl mt-8 md:mt-12">
+                    <h3 className="font-serif text-2xl md:text-3xl lg:text-4xl text-gray-900 mb-4 md:mb-6">{dict.landing.workflow.f1_title}</h3>
+                    <p className="text-gray-500 font-light leading-relaxed text-base md:text-lg">
                       {dict.landing.workflow.f1_desc}
                     </p>
                  </div>
               </div>
 
-              <div className="md:col-span-4 bg-white p-10 md:p-14 flex flex-col justify-between group hover:bg-gray-50/30 transition-colors">
+              <div className="md:col-span-4 bg-white p-6 md:p-14 flex flex-col justify-between group hover:bg-gray-50/30 transition-colors">
                  <div className="flex justify-between items-start">
                     <BrainCircuit className="w-8 h-8 text-gray-300 group-hover:text-orange-600 transition-colors" />
                     <span className="text-xs font-mono uppercase tracking-widest text-gray-400">{dict.landing.workflow.f2_label}</span>
                  </div>
                  
-                 <div className="mt-12">
-                    <h3 className="font-serif text-2xl text-gray-900 mb-4">{dict.landing.workflow.f2_title}</h3>
+                 <div className="mt-8 md:mt-12">
+                    <h3 className="font-serif text-xl md:text-2xl text-gray-900 mb-4">{dict.landing.workflow.f2_title}</h3>
                     <p className="text-gray-500 font-light text-sm leading-relaxed mb-6">
                       {dict.landing.workflow.f2_desc}
                     </p>
@@ -113,26 +113,26 @@ export default async function LandingPage() {
                  </div>
               </div>
 
-              <div className="md:col-span-4 bg-white p-10 md:p-14 flex flex-col justify-between group hover:bg-gray-50/30 transition-colors">
+              <div className="md:col-span-4 bg-white p-6 md:p-14 flex flex-col justify-between group hover:bg-gray-50/30 transition-colors">
                  <div className="flex justify-between items-start">
                     <FileJson className="w-8 h-8 text-gray-300 group-hover:text-orange-600 transition-colors" />
                     <span className="text-xs font-mono uppercase tracking-widest text-gray-400">{dict.landing.workflow.f3_label}</span>
                  </div>
                  <div className="mt-8">
-                    <h3 className="font-serif text-2xl text-gray-900 mb-4">{dict.landing.workflow.f3_title}</h3>
+                    <h3 className="font-serif text-xl md:text-2xl text-gray-900 mb-4">{dict.landing.workflow.f3_title}</h3>
                     <p className="text-gray-500 font-light text-sm">
                         {dict.landing.workflow.f3_desc}
                     </p>
                  </div>
               </div>
 
-              <div className="md:col-span-8 bg-white p-10 md:p-14 flex flex-col md:flex-row md:items-end justify-between gap-8 group hover:bg-gray-50/30 transition-colors">
+              <div className="md:col-span-8 bg-white p-6 md:p-14 flex flex-col md:flex-row md:items-end justify-between gap-8 group hover:bg-gray-50/30 transition-colors">
                  <div className="max-w-md">
                     <div className="flex items-center gap-3 mb-4">
                       <ShieldCheck className="w-8 h-8 text-gray-300 group-hover:text-orange-600 transition-colors" />
                       <span className="text-xs font-mono uppercase tracking-widest text-gray-400">{dict.landing.workflow.f4_label}</span>
                     </div>
-                    <h3 className="font-serif text-3xl text-gray-900 mb-4">{dict.landing.workflow.f4_title}</h3>
+                    <h3 className="font-serif text-2xl md:text-3xl text-gray-900 mb-4">{dict.landing.workflow.f4_title}</h3>
                     <p className="text-gray-500 font-light leading-relaxed">
                       {dict.landing.workflow.f4_desc}
                     </p>
@@ -147,11 +147,11 @@ export default async function LandingPage() {
           </div>
         </section>
 
-        <section className="py-32 border-t border-gray-100 bg-white">
+        <section className="py-20 md:py-32 border-t border-gray-100 bg-white">
            <div className="layout-container">
-             <div className="flex flex-col items-center text-center max-w-2xl mx-auto">
+             <div className="flex flex-col items-start md:items-center text-left md:text-center max-w-2xl mx-0 md:mx-auto">
                 
-                <h2 className="font-serif text-5xl md:text-6xl text-gray-900 mb-6 tracking-tight">
+                <h2 className="font-serif text-4xl sm:text-5xl md:text-6xl text-gray-900 mb-6 tracking-tight">
                    {dict.landing.cta.title}
                 </h2>
                 <p className="text-lg text-gray-500 font-light mb-12">

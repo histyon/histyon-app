@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import { HardDrive, Download, BrainCircuit, FileText, Server, AlertTriangle, RefreshCw, XCircle, FileImage, Code2, FolderArchive } from 'lucide-react'
+import { HardDrive, Download, BrainCircuit, FileText, Server, AlertTriangle, RefreshCw, XCircle, FileImage, FolderArchive, Activity } from 'lucide-react'
 import { StatusTimeline } from '@/components/ticket/StatusTimeline'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
@@ -20,6 +20,7 @@ export function TicketRealtimeView({ initialTicket, dict }: RealTimeProps) {
   const supabase = createClient()
   const router = useRouter()
   const t = dict.dashboard.realtime;
+  const tResults = dict.dashboard.results || {};
 
   const rawStatus = ticket.status || 'UPLOADING'
   const status = rawStatus.toUpperCase().trim()
@@ -112,12 +113,12 @@ export function TicketRealtimeView({ initialTicket, dict }: RealTimeProps) {
                 link.click();
                 document.body.removeChild(link);
             } else {
-                alert(dict.validation?.fileNotFound || "File di progetto non trovato nel server")
+                alert(dict.validation?.fileNotFound || "File di progetto non trovato")
             }
         }
     } catch (error) {
         console.error("Errore nel download del progetto:", error);
-        alert("Si è verificato un problema di rete o di permessi scaricando il progetto QuPath.");
+        alert("Si è verificato un problema di rete o di permessi.");
     } finally {
         setIsDownloadingProject(false)
     }
@@ -132,6 +133,7 @@ export function TicketRealtimeView({ initialTicket, dict }: RealTimeProps) {
   }
 
   const displayOutputName = ticket.output_dzi_url || ticket.ai_metadata?.output_file || ticket.file_name
+  const stats = ticket.ai_results?.summary;
 
   return (
     <div className="space-y-8 animate-in fade-in duration-500">
@@ -220,71 +222,102 @@ export function TicketRealtimeView({ initialTicket, dict }: RealTimeProps) {
                 )}
 
                 {isCompleted && (
-                    <div className="space-y-4 animate-in fade-in flex-1 flex flex-col justify-center">
+                    <div className="space-y-5 animate-in fade-in flex-1 flex flex-col justify-center">
                         
-                        <div className="bg-white/10 p-6 rounded-2xl backdrop-blur-sm border border-white/10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-                            <div className="flex items-center gap-4 flex-1 min-w-0 w-full">
-                                <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center text-green-600 flex-shrink-0">
-                                    <FileImage className="w-6 h-6" />
-                                </div>
-                                <div className="min-w-0 flex-1">
-                                    <p className="text-xs uppercase font-bold opacity-70">{t.outputFile}</p>
-                                    <p className="font-mono text-sm font-bold truncate w-full" title={displayOutputName}>
-                                        {displayOutputName}
-                                    </p>
-                                </div>
-                            </div>
-                            <button 
-                                onClick={handleDownload}
-                                disabled={isDownloading}
-                                className="flex-shrink-0 w-full sm:w-auto flex items-center justify-center gap-2 bg-white text-green-700 px-5 py-3 rounded-xl font-bold hover:bg-green-50 transition-all shadow-lg hover:scale-105 disabled:opacity-50 disabled:scale-100"
-                            >
-                                {isDownloading ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
-                                {t.download}
-                            </button>
-                        </div>
-
-                        {ticket.project_file_url && (
-                            <div className="bg-white/10 p-6 rounded-2xl backdrop-blur-sm border border-white/10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-                                <div className="flex items-center gap-4 flex-1 min-w-0 w-full">
-                                    <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center text-blue-600 flex-shrink-0">
-                                        <FolderArchive className="w-6 h-6" />
+                        {/* Sezione Download */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div className="bg-white/10 p-5 rounded-2xl backdrop-blur-sm border border-white/10 flex flex-col justify-between gap-4">
+                                <div className="flex items-center gap-3">
+                                    <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center text-green-600 flex-shrink-0">
+                                        <FileImage className="w-5 h-5" />
                                     </div>
-                                    <div className="min-w-0 flex-1">
-                                        <p className="text-xs uppercase font-bold opacity-70">Progetto QuPath</p>
-                                        <p className="font-mono text-sm font-bold truncate w-full" title={ticket.project_file_url}>
-                                            {ticket.project_file_url.split('/').pop()}
+                                    <div className="min-w-0">
+                                        <p className="text-xs uppercase font-bold opacity-70">{t.outputFile}</p>
+                                        <p className="font-mono text-sm font-bold truncate" title={displayOutputName}>
+                                            Immagine Analizzata
                                         </p>
                                     </div>
                                 </div>
                                 <button 
-                                    onClick={handleProjectDownload}
-                                    disabled={isDownloadingProject}
-                                    className="flex-shrink-0 w-full sm:w-auto flex items-center justify-center gap-2 bg-white text-blue-800 px-5 py-3 rounded-xl font-bold hover:bg-blue-50 transition-all shadow-lg hover:scale-105 disabled:opacity-50 disabled:scale-100"
+                                    onClick={handleDownload}
+                                    disabled={isDownloading}
+                                    className="w-full flex items-center justify-center gap-2 bg-white text-green-700 px-4 py-2.5 rounded-xl font-bold hover:bg-green-50 transition-all shadow-md hover:scale-[1.02] disabled:opacity-50 disabled:scale-100"
                                 >
-                                    {isDownloadingProject ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
-                                    Scarica Progetto
+                                    {isDownloading ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
+                                    Scarica DZI
                                 </button>
                             </div>
-                        )}
 
-                        <div className="flex flex-col gap-2 h-full min-h-[200px] mt-4">
-                            <p className="text-xs uppercase font-bold opacity-70 flex items-center gap-2">
-                                <Code2 className="w-4 h-4" /> {t.resultsJson}
-                            </p>
-                            
-                            {ticket.ai_results ? (
-                                <div className="bg-black/30 p-4 rounded-2xl font-mono text-xs border border-white/10 shadow-inner overflow-y-auto max-h-[300px] custom-scrollbar">
-                                    <pre className="whitespace-pre-wrap text-green-100 leading-relaxed break-all">
-                                        {JSON.stringify(ticket.ai_results, null, 2)}
-                                    </pre>
-                                </div>
-                            ) : (
-                                <div className="bg-black/20 p-5 rounded-2xl font-mono text-xs h-32 border border-white/10 shadow-inner flex items-center justify-center text-white/40 italic">
-                                    {t.noJson}
+                            {ticket.project_file_url && (
+                                <div className="bg-white/10 p-5 rounded-2xl backdrop-blur-sm border border-white/10 flex flex-col justify-between gap-4">
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center text-blue-600 flex-shrink-0">
+                                            <FolderArchive className="w-5 h-5" />
+                                        </div>
+                                        <div className="min-w-0">
+                                            <p className="text-xs uppercase font-bold opacity-70">Progetto QuPath</p>
+                                            <p className="font-mono text-sm font-bold truncate" title={ticket.project_file_url}>
+                                                Dataset Completo
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <button 
+                                        onClick={handleProjectDownload}
+                                        disabled={isDownloadingProject}
+                                        className="w-full flex items-center justify-center gap-2 bg-white text-blue-800 px-4 py-2.5 rounded-xl font-bold hover:bg-blue-50 transition-all shadow-md hover:scale-[1.02] disabled:opacity-50 disabled:scale-100"
+                                    >
+                                        {isDownloadingProject ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
+                                        Scarica Progetto
+                                    </button>
                                 </div>
                             )}
                         </div>
+
+                        <div className="mt-4">
+                            <h4 className="text-sm uppercase tracking-widest font-bold opacity-90 flex items-center gap-2 mb-4 border-b border-white/20 pb-2">
+                                <Activity className="w-4 h-4" /> Risultati Analisi
+                            </h4>
+                            
+                            {stats ? (
+                                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                                    {stats.percentuale_tessuto_malato !== undefined && (
+                                        <div className="bg-white/10 p-4 rounded-xl border border-white/10 backdrop-blur-sm hover:bg-white/20 transition-colors">
+                                            <p className="text-[10px] uppercase font-bold opacity-70 mb-1">{tResults.sickTissue || 'Tessuto Malato'}</p>
+                                            <p className="text-2xl font-bold">{stats.percentuale_tessuto_malato.toFixed(1)}%</p>
+                                        </div>
+                                    )}
+                                    {stats.counts?.glomeruli !== undefined && (
+                                        <div className="bg-white/10 p-4 rounded-xl border border-white/10 backdrop-blur-sm hover:bg-white/20 transition-colors">
+                                            <p className="text-[10px] uppercase font-bold opacity-70 mb-1">{tResults.totalGlom || 'Glomeruli Totali'}</p>
+                                            <p className="text-2xl font-bold">{stats.counts.glomeruli}</p>
+                                        </div>
+                                    )}
+                                    {stats.counts?.glomeruli_sclerotici !== undefined && (
+                                        <div className="bg-white/10 p-4 rounded-xl border border-white/10 backdrop-blur-sm hover:bg-white/20 transition-colors">
+                                            <p className="text-[10px] uppercase font-bold opacity-70 mb-1">{tResults.scleroGlom || 'Glom. Sclerotici'}</p>
+                                            <p className="text-2xl font-bold">{stats.counts.glomeruli_sclerotici}</p>
+                                        </div>
+                                    )}
+                                    {stats.counts?.tubuli_prossimali !== undefined && (
+                                        <div className="bg-white/10 p-4 rounded-xl border border-white/10 backdrop-blur-sm hover:bg-white/20 transition-colors">
+                                            <p className="text-[10px] uppercase font-bold opacity-70 mb-1">Tubuli Prossimali</p>
+                                            <p className="text-2xl font-bold">{stats.counts.tubuli_prossimali}</p>
+                                        </div>
+                                    )}
+                                    {stats.counts?.tubuli_distali !== undefined && (
+                                        <div className="bg-white/10 p-4 rounded-xl border border-white/10 backdrop-blur-sm hover:bg-white/20 transition-colors">
+                                            <p className="text-[10px] uppercase font-bold opacity-70 mb-1">Tubuli Distali</p>
+                                            <p className="text-2xl font-bold">{stats.counts.tubuli_distali}</p>
+                                        </div>
+                                    )}
+                                </div>
+                            ) : (
+                                <div className="bg-white/5 p-5 rounded-2xl text-sm h-24 border border-white/10 flex items-center justify-center text-white/50 italic">
+                                    Nessun risultato quantitativo estratto.
+                                </div>
+                            )}
+                        </div>
+
                     </div>
                 )}
 

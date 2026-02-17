@@ -145,9 +145,9 @@ export function SettingsForm({ user, profile, dict }: SettingsFormProps) {
       )}
 
       {activeTab === 'security' && (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 animate-in fade-in slide-in-from-bottom-2 duration-300">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 animate-in fade-in slide-in-from-bottom-2 duration-300 items-stretch">
           
-          <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden h-fit">
+          <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden flex flex-col h-full">
             <div className="px-6 py-5 border-b border-gray-100 bg-gray-50/50 flex items-center gap-3">
                 <div className="p-2 bg-white rounded-lg border border-gray-200 text-gray-700 shadow-sm">
                     <Mail className="w-4 h-4" />
@@ -155,25 +155,27 @@ export function SettingsForm({ user, profile, dict }: SettingsFormProps) {
                 <h3 className="text-base font-semibold text-gray-900">{d.sections.email}</h3>
             </div>
             
-            <div className="p-6">
+            <div className="p-6 flex-1 flex flex-col">
                 {feedback?.section === 'email' && (
                     <div className={`mb-6 p-4 rounded-xl flex items-center gap-3 text-sm font-medium border ${feedback.type === 'success' ? 'bg-green-50 text-green-800 border-green-200' : 'bg-red-50 text-red-800 border-red-200'}`}>
                         {feedback.text}
                     </div>
                 )}
                 
-                <form action={(fd) => handleSubmit(updateEmail, fd, 'email')} className="space-y-6">
-                    <ValidatedInput name="email" label={f.labels.email} defaultValue={user.email} />
-                    
-                    <div className="bg-gray-50 p-4 rounded-xl border border-gray-200 text-gray-600 text-sm flex gap-3">
-                        <AlertCircle className="w-5 h-5 shrink-0 text-gray-400" />
-                        <p>{d.form.emailNotice}</p>
+                <form action={(fd) => handleSubmit(updateEmail, fd, 'email')} className="flex-1 flex flex-col">
+                    <div className="space-y-6 flex-1">
+                        <ValidatedInput name="email" label={f.labels.email} defaultValue={user.email} />
+                        
+                        <div className="bg-gray-50 p-4 rounded-xl border border-gray-200 text-gray-600 text-sm flex gap-3">
+                            <AlertCircle className="w-5 h-5 shrink-0 text-gray-400" />
+                            <p>{d.form.emailNotice}</p>
+                        </div>
                     </div>
                     
                     <button 
                         type="submit" 
                         disabled={isPending} 
-                        className="w-full bg-white border border-gray-200 text-gray-900 py-3 rounded-xl text-sm font-semibold hover:bg-gray-50 transition-all disabled:opacity-50 flex items-center justify-center gap-2 shadow-sm"
+                        className="w-full mt-8 bg-white border border-gray-200 text-gray-900 py-3 rounded-xl text-sm font-semibold hover:bg-gray-50 transition-all disabled:opacity-50 flex items-center justify-center gap-2 shadow-sm"
                     >
                         {isPending && <Loader2 className="w-4 h-4 animate-spin" />}
                         {isPending ? d.form.updating : d.form.updateBtn}
@@ -182,7 +184,7 @@ export function SettingsForm({ user, profile, dict }: SettingsFormProps) {
             </div>
           </div>
 
-          <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden h-fit">
+          <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden flex flex-col h-full">
             <div className="px-6 py-5 border-b border-gray-100 bg-gray-50/50 flex items-center gap-3">
                 <div className="p-2 bg-white rounded-lg border border-gray-200 text-gray-700 shadow-sm">
                     <KeyRound className="w-4 h-4" />
@@ -190,21 +192,23 @@ export function SettingsForm({ user, profile, dict }: SettingsFormProps) {
                 <h3 className="text-base font-semibold text-gray-900">{d.sections.password}</h3>
             </div>
 
-            <div className="p-6">
+            <div className="p-6 flex-1 flex flex-col">
                 {feedback?.section === 'password' && (
                     <div className={`mb-6 p-4 rounded-xl flex items-center gap-3 text-sm font-medium border ${feedback.type === 'success' ? 'bg-green-50 text-green-800 border-green-200' : 'bg-red-50 text-red-800 border-red-200'}`}>
                         {feedback.text}
                     </div>
                 )}
 
-                <form id="password-form" action={(fd) => handleSubmit(updatePassword, fd, 'password')} className="space-y-6">
-                    <ValidatedInput name="password" type="password" label={d.form.newPassword} placeholder="••••••••" />
-                    <ValidatedInput name="confirm_password" type="password" label={d.form.confirmPassword} placeholder="••••••••" />
+                <form id="password-form" action={(fd) => handleSubmit(updatePassword, fd, 'password')} className="flex-1 flex flex-col">
+                    <div className="space-y-6 flex-1">
+                        <ValidatedInput name="password" type="password" label={d.form.newPassword} placeholder="••••••••" />
+                        <ValidatedInput name="confirm_password" type="password" label={d.form.confirmPassword} placeholder="••••••••" />
+                    </div>
                     
                     <button 
                         type="submit" 
                         disabled={isPending} 
-                        className="w-full bg-gray-900 text-white py-3 rounded-xl text-sm font-semibold hover:bg-black transition-all shadow-sm active:scale-[0.98] disabled:opacity-70 flex items-center justify-center gap-2"
+                        className="w-full mt-8 bg-gray-900 text-white py-3 rounded-xl text-sm font-semibold hover:bg-black transition-all shadow-sm active:scale-[0.98] disabled:opacity-70 flex items-center justify-center gap-2"
                     >
                         {isPending && <Loader2 className="w-4 h-4 animate-spin" />}
                         {isPending ? d.form.updating : d.form.savePassword}

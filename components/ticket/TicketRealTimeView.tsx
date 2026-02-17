@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import { HardDrive, Download, BrainCircuit, FileText, Server, AlertTriangle, RefreshCw, XCircle, FileImage, Code2 } from 'lucide-react'
+import { HardDrive, Download, BrainCircuit, FileText, Server, AlertTriangle, RefreshCw, XCircle, FileImage, Code2, FolderArchive } from 'lucide-react'
 import { StatusTimeline } from '@/components/ticket/StatusTimeline'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
@@ -16,6 +16,7 @@ interface RealTimeProps {
 export function TicketRealtimeView({ initialTicket, dict }: RealTimeProps) {
   const [ticket, setTicket] = useState(initialTicket)
   const [isDownloading, setIsDownloading] = useState(false)
+  const [isDownloadingProject, setIsDownloadingProject] = useState(false)
   const supabase = createClient()
   const router = useRouter()
   const t = dict.dashboard.realtime;
@@ -48,7 +49,7 @@ export function TicketRealtimeView({ initialTicket, dict }: RealTimeProps) {
     const outputFileName = ticket.output_dzi_url || ticket.ai_metadata?.output_file
     
     if (!outputFileName) {
-        alert(t.outputNotReady)
+        alert(t.outputNotReady || "Output non pronto")
         setIsDownloading(false)
         return
     }
@@ -58,19 +59,68 @@ export function TicketRealtimeView({ initialTicket, dict }: RealTimeProps) {
          fullPathKey = `${ticket.doctor_id}/${ticket.patient_id}/${outputFileName}`;
     }
 
-    const res = await getPresignedDownloadUrl(fullPathKey, 'output')
-    
-    if (res.success && res.url) {
-        const link = document.createElement('a');
-        link.href = res.url;
-        link.setAttribute('download', outputFileName);
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-    } else {
-        alert(dict.validation.fileNotFound)
+    try {
+        const res = await getPresignedDownloadUrl(fullPathKey, 'output')
+        
+        if (res.success && res.url) {
+            const link = document.createElement('a');
+            link.href = res.url;
+            link.setAttribute('download', outputFileName.split('/').pop() || 'output');
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        } else {
+            alert(dict.validation?.fileNotFound || "File non trovato")
+        }
+    } catch (error) {
+        console.error("Errore nel download:", error);
+        alert("Si è verificato un errore durante il download.");
+    } finally {
+        setIsDownloading(false)
     }
-    setIsDownloading(false)
+  }
+
+  const handleProjectDownload = async () => {
+    if (!ticket.project_file_url) {
+        alert(t.outputNotReady || "File di progetto non pronto")
+        return
+    }
+
+    setIsDownloadingProject(true)
+    
+    try {
+        if (ticket.project_file_url.startsWith('http')) {
+            const link = document.createElement('a');
+            link.href = ticket.project_file_url;
+            link.setAttribute('download', ticket.project_file_url.split('/').pop() || 'qupath_project.zip');
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        } else {
+            let fullPathKey = ticket.project_file_url;
+            if (!ticket.project_file_url.includes('/')) {
+                fullPathKey = `${ticket.doctor_id}/${ticket.patient_id}/${ticket.project_file_url}`;
+            }
+
+            const res = await getPresignedDownloadUrl(fullPathKey, 'output')
+            
+            if (res.success && res.url) {
+                const link = document.createElement('a');
+                link.href = res.url;
+                link.setAttribute('download', ticket.project_file_url.split('/').pop() || 'qupath_project.zip');
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            } else {
+                alert(dict.validation?.fileNotFound || "File di progetto non trovato nel server")
+            }
+        }
+    } catch (error) {
+        console.error("Errore nel download del progetto:", error);
+        alert("Si è verificato un problema di rete o di permessi scaricando il progetto QuPath.");
+    } finally {
+        setIsDownloadingProject(false)
+    }
   }
 
   const getBoxClasses = () => {
@@ -170,7 +220,7 @@ export function TicketRealtimeView({ initialTicket, dict }: RealTimeProps) {
                 )}
 
                 {isCompleted && (
-                    <div className="space-y-6 animate-in fade-in flex-1 flex flex-col justify-center">
+                    <div className="space-y-4 animate-in fade-in flex-1 flex flex-col justify-center">
                         
                         <div className="bg-white/10 p-6 rounded-2xl backdrop-blur-sm border border-white/10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                             <div className="flex items-center gap-4 flex-1 min-w-0 w-full">
@@ -194,7 +244,31 @@ export function TicketRealtimeView({ initialTicket, dict }: RealTimeProps) {
                             </button>
                         </div>
 
-                        <div className="flex flex-col gap-2 h-full min-h-[200px]">
+                        {ticket.project_file_url && (
+                            <div className="bg-white/10 p-6 rounded-2xl backdrop-blur-sm border border-white/10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                                <div className="flex items-center gap-4 flex-1 min-w-0 w-full">
+                                    <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center text-blue-600 flex-shrink-0">
+                                        <FolderArchive className="w-6 h-6" />
+                                    </div>
+                                    <div className="min-w-0 flex-1">
+                                        <p className="text-xs uppercase font-bold opacity-70">Progetto QuPath</p>
+                                        <p className="font-mono text-sm font-bold truncate w-full" title={ticket.project_file_url}>
+                                            {ticket.project_file_url.split('/').pop()}
+                                        </p>
+                                    </div>
+                                </div>
+                                <button 
+                                    onClick={handleProjectDownload}
+                                    disabled={isDownloadingProject}
+                                    className="flex-shrink-0 w-full sm:w-auto flex items-center justify-center gap-2 bg-white text-blue-800 px-5 py-3 rounded-xl font-bold hover:bg-blue-50 transition-all shadow-lg hover:scale-105 disabled:opacity-50 disabled:scale-100"
+                                >
+                                    {isDownloadingProject ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
+                                    Scarica Progetto
+                                </button>
+                            </div>
+                        )}
+
+                        <div className="flex flex-col gap-2 h-full min-h-[200px] mt-4">
                             <p className="text-xs uppercase font-bold opacity-70 flex items-center gap-2">
                                 <Code2 className="w-4 h-4" /> {t.resultsJson}
                             </p>

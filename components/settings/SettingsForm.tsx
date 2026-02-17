@@ -1,150 +1,196 @@
 'use client'
 
-import { useState, useTransition } from 'react'
-import { updateProfile, updateEmail, updatePassword } from '@/lib/actions/settings'
-import { User, Lock, Building2, MapPin, Phone, Save, Loader2, AlertCircle, CheckCircle2, Mail, KeyRound } from 'lucide-react'
-import { DateOfBirthPicker } from '@/components/ui/DateOfBirthPicker'
-import { ValidatedInput, GlobalLocationSelector, PhoneInput } from '@/components/ui/FormElements'
+import { useState } from 'react'
+import { User, Shield, KeyRound, Mail, Save, BadgeCheck } from 'lucide-react'
 
 interface SettingsFormProps {
-  user: any
-  profile: any
-  dict: any
+  user?: any;
+  dict?: any;
 }
 
-export function SettingsForm({ user, profile, dict }: SettingsFormProps) {
-  const [activeTab, setActiveTab] = useState<'profile' | 'security'>('profile')
-  const [isPending, startTransition] = useTransition()
-  const [feedback, setFeedback] = useState<{ section: string, type: 'success' | 'error', text: string } | null>(null)
-  
-  const d = dict.dashboard.settings
-  const f = dict.auth.form 
+export default function SettingsForm({ user, dict }: SettingsFormProps) {
+  const [isSavingProfile, setIsSavingProfile] = useState(false);
+  const [isSavingSecurity, setIsSavingSecurity] = useState(false);
 
-  const handleSubmit = async (action: Function, formData: FormData, section: string) => {
-    setFeedback(null)
-    startTransition(async () => {
-      const res = await action(formData)
-      if (res.error) setFeedback({ section, type: 'error', text: res.error })
-      else {
-        setFeedback({ section, type: 'success', text: res.message || d.form.success })
-        if (section === 'password') (document.getElementById('password-form') as HTMLFormElement)?.reset()
-      }
-    })
-  }
+  const t = dict?.dashboard?.settings || {
+    profileTitle: "Profilo Personale",
+    profileDesc: "Gestisci le tue informazioni personali e i dati di contatto.",
+    securityTitle: "Sicurezza e Password",
+    securityDesc: "Aggiorna la tua password per mantenere l'account protetto.",
+    saveBtn: "Salva Modifiche",
+    savingBtn: "Salvataggio..."
+  };
 
-  const labelClass = "text-xs font-bold text-gray-500 uppercase tracking-wider ml-1 mb-1.5 block"
+  const handleProfileSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSavingProfile(true);
+    setTimeout(() => setIsSavingProfile(false), 1000);
+  };
+
+  const handleSecuritySubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSavingSecurity(true);
+    setTimeout(() => setIsSavingSecurity(false), 1000);
+  };
 
   return (
-    <div className="w-full">
-      <div className="flex gap-2 p-1 bg-gray-100/50 rounded-xl w-fit mb-8">
-        <button onClick={() => setActiveTab('profile')} className={`flex items-center gap-2 px-5 py-2.5 text-sm font-bold rounded-lg transition-all ${activeTab === 'profile' ? 'bg-white text-black shadow-sm' : 'text-gray-500 hover:text-gray-900 hover:bg-gray-100'}`}>
-          <User className="w-4 h-4" /> {d.tabs.profile}
-        </button>
-        <button onClick={() => setActiveTab('security')} className={`flex items-center gap-2 px-5 py-2.5 text-sm font-bold rounded-lg transition-all ${activeTab === 'security' ? 'bg-white text-black shadow-sm' : 'text-gray-500 hover:text-gray-900 hover:bg-gray-100'}`}>
-          <Lock className="w-4 h-4" /> {d.tabs.security}
-        </button>
+    <div className="max-w-4xl mx-auto space-y-8 animate-in fade-in duration-500 pb-12">
+      
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold text-gray-900 tracking-tight">Impostazioni</h1>
+        <p className="text-gray-500 mt-2 text-sm">
+          Gestisci le preferenze del tuo account, il profilo clinico e la sicurezza.
+        </p>
       </div>
 
-      {activeTab === 'profile' && (
-        <form action={(fd) => handleSubmit(updateProfile, fd, 'profile')} className="space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-300">
-          
-          {feedback?.section === 'profile' && (
-            <div className={`p-4 rounded-xl flex items-center gap-3 text-sm font-medium ${feedback.type === 'success' ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'}`}>
-              {feedback.type === 'success' ? <CheckCircle2 className="w-5 h-5" /> : <AlertCircle className="w-5 h-5" />}
-              {feedback.text}
+      <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+        <div className="px-8 py-6 border-b border-gray-100 bg-gray-50/30 flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <div className="p-2.5 bg-gray-100 text-gray-700 rounded-xl border border-gray-200/50">
+              <User className="w-5 h-5" />
             </div>
-          )}
-
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            <div className="lg:col-span-2 space-y-8">
-              <div className="bg-white p-8 rounded-3xl border border-gray-100 shadow-sm">
-                <div className="flex items-center gap-3 mb-6 border-b border-gray-50 pb-4">
-                    <div className="w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center text-blue-600"><User className="w-5 h-5" /></div>
-                    <h3 className="text-lg font-bold text-gray-900">{d.sections.personal}</h3>
-                </div>
-                <div className="space-y-6">
-                    <div className="grid grid-cols-2 gap-5">
-                        <ValidatedInput name="firstName" label={f.labels.firstName} defaultValue={profile?.first_name} required />
-                        <ValidatedInput name="lastName" label={f.labels.lastName} defaultValue={profile?.last_name} required />
-                    </div>
-                    <div className="grid grid-cols-2 gap-5">
-                        <PhoneInput label={f.labels.phone} defaultValue={profile?.phone_number} />
-                        <ValidatedInput name="placeOfBirth" label={f.labels.birthPlace} defaultValue={profile?.place_of_birth} />
-                    </div>
-                    <div>
-                        <label className={labelClass}>{f.labels.dob}</label>
-
-                        <DateOfBirthPicker 
-                            name="birth_date" 
-                            dict={dict} 
-                            defaultDate={profile?.date_of_birth} 
-                        />
-                    </div>
-                </div>
-              </div>
-
-              <div className="bg-white p-8 rounded-3xl border border-gray-100 shadow-sm">
-                <div className="flex items-center gap-3 mb-6 border-b border-gray-50 pb-4">
-                    <div className="w-10 h-10 rounded-full bg-green-50 flex items-center justify-center text-green-600"><MapPin className="w-5 h-5" /></div>
-                    <h3 className="text-lg font-bold text-gray-900">{d.sections.residence}</h3>
-                </div>
-                <GlobalLocationSelector 
-                    dict={dict} 
-                    defaults={{
-                        country: profile?.country,
-                        addressStreet: profile?.address_street,
-                        addressCivic: profile?.address_civic,
-                        postalCode: profile?.postal_code,
-                        city: profile?.city,
-                        region: profile?.province
-                    }} 
-                />
-              </div>
+            <div>
+              <h2 className="text-base font-semibold text-gray-900">{t.profileTitle}</h2>
+              <p className="text-sm text-gray-500 mt-0.5">{t.profileDesc}</p>
             </div>
-
-            <div className="space-y-8 flex flex-col h-full">
-                <div className="bg-white p-8 rounded-3xl border border-gray-100 shadow-sm flex-1">
-                    <div className="flex items-center gap-3 mb-6 border-b border-gray-50 pb-4">
-                        <div className="w-10 h-10 rounded-full bg-purple-50 flex items-center justify-center text-purple-600"><Building2 className="w-5 h-5" /></div>
-                        <h3 className="text-lg font-bold text-gray-900">{d.sections.professional}</h3>
-                    </div>
-                    <div className="space-y-6">
-                        <ValidatedInput name="hospitalName" label={f.labels.hospital} defaultValue={profile?.hospital_name} />
-                        <ValidatedInput name="medicalLicense" label={f.labels.medicalLicense} defaultValue={profile?.medical_license_number} />
-                    </div>
-                </div>
-                <div className="sticky bottom-4">
-                    <button type="submit" disabled={isPending} className="w-full bg-black text-white py-4 rounded-xl font-bold hover:bg-gray-800 transition-all flex items-center justify-center gap-2 disabled:opacity-70 shadow-xl shadow-black/10 active:scale-[0.98]">
-                        {isPending ? <Loader2 className="w-5 h-5 animate-spin" /> : <Save className="w-5 h-5" />} {d.form.updateBtn}
-                    </button>
-                </div>
-            </div>
-          </div>
-        </form>
-      )}
-
-      {activeTab === 'security' && (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 animate-in fade-in slide-in-from-bottom-2 duration-300">
-          <div className="bg-white p-8 rounded-3xl border border-gray-100 shadow-sm h-fit">
-            <div className="flex items-center gap-3 mb-6"><div className="w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center text-blue-600"><Mail className="w-5 h-5" /></div><h3 className="text-lg font-bold text-gray-900">{d.sections.email}</h3></div>
-            {feedback?.section === 'email' && <div className={`mb-6 p-3 rounded-lg text-sm font-medium ${feedback.type === 'success' ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'}`}>{feedback.text}</div>}
-            <form action={(fd) => handleSubmit(updateEmail, fd, 'email')} className="space-y-6">
-                <ValidatedInput name="email" label="Email" defaultValue={user.email} />
-                <div className="bg-blue-50 p-4 rounded-xl border border-blue-100 text-blue-700 text-xs flex gap-3"><AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />{d.form.emailNotice}</div>
-                <button type="submit" disabled={isPending} className="w-full bg-white border border-gray-200 text-gray-900 py-3 rounded-xl font-bold hover:bg-gray-50 transition-all disabled:opacity-50">{d.form.updateBtn}</button>
-            </form>
-          </div>
-          <div className="bg-white p-8 rounded-3xl border border-gray-100 shadow-sm h-fit">
-            <div className="flex items-center gap-3 mb-6"><div className="w-10 h-10 rounded-full bg-red-50 flex items-center justify-center text-red-600"><KeyRound className="w-5 h-5" /></div><h3 className="text-lg font-bold text-gray-900">{d.sections.password}</h3></div>
-            {feedback?.section === 'password' && <div className={`mb-6 p-3 rounded-lg text-sm font-medium ${feedback.type === 'success' ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'}`}>{feedback.text}</div>}
-            <form id="password-form" action={(fd) => handleSubmit(updatePassword, fd, 'password')} className="space-y-6">
-                <ValidatedInput name="password" type="password" label={d.form.newPassword} placeholder="••••••••" />
-                <ValidatedInput name="confirm_password" type="password" label={d.form.confirmPassword} placeholder="••••••••" />
-                <button type="submit" disabled={isPending} className="w-full bg-red-600 text-white py-3 rounded-xl font-bold hover:bg-red-700 transition-all shadow-lg shadow-red-600/20 disabled:opacity-50">{d.form.savePassword}</button>
-            </form>
           </div>
         </div>
-      )}
+
+        <div className="p-8">
+          <form onSubmit={handleProfileSubmit} className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
+              
+              <div className="space-y-2.5">
+                <label className="text-sm font-semibold text-gray-700" htmlFor="firstName">Nome</label>
+                <input 
+                  type="text" 
+                  id="firstName"
+                  name="firstName"
+                  defaultValue={user?.first_name || ''}
+                  className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:bg-white focus:ring-2 focus:ring-gray-200 focus:border-gray-900 transition-all outline-none"
+                  placeholder="Il tuo nome"
+                />
+              </div>
+
+              <div className="space-y-2.5">
+                <label className="text-sm font-semibold text-gray-700" htmlFor="lastName">Cognome</label>
+                <input 
+                  type="text" 
+                  id="lastName"
+                  name="lastName"
+                  defaultValue={user?.last_name || ''}
+                  className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:bg-white focus:ring-2 focus:ring-gray-200 focus:border-gray-900 transition-all outline-none"
+                  placeholder="Il tuo cognome"
+                />
+              </div>
+
+              <div className="space-y-2.5 md:col-span-2">
+                <label className="text-sm font-semibold text-gray-700" htmlFor="email">Indirizzo Email</label>
+                <div className="relative max-w-md">
+                  <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                    <Mail className="h-4 w-4 text-gray-400" />
+                  </div>
+                  <input 
+                    type="email" 
+                    id="email"
+                    defaultValue={user?.email || ''}
+                    readOnly
+                    className="w-full pl-11 pr-10 py-2.5 bg-gray-100 border border-gray-200 text-gray-500 rounded-xl text-sm cursor-not-allowed outline-none"
+                  />
+                  <div className="absolute inset-y-0 right-0 pr-4 flex items-center pointer-events-none">
+                    <BadgeCheck className="h-4 w-4 text-gray-400" />
+                  </div>
+                </div>
+                <p className="text-xs text-gray-500 mt-1.5 font-medium">L'indirizzo email di sistema non può essere modificato.</p>
+              </div>
+            </div>
+
+            <div className="flex justify-end pt-6 border-t border-gray-100 mt-8">
+              <button 
+                type="submit"
+                disabled={isSavingProfile}
+                className="flex items-center gap-2 bg-gray-900 text-white px-6 py-2.5 rounded-xl text-sm font-semibold hover:bg-gray-800 transition-all shadow-sm active:scale-[0.98] disabled:opacity-70 disabled:pointer-events-none"
+              >
+                {isSavingProfile ? <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <Save className="w-4 h-4" />}
+                {isSavingProfile ? t.savingBtn : t.saveBtn}
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+        <div className="px-8 py-6 border-b border-gray-100 bg-gray-50/30 flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <div className="p-2.5 bg-gray-100 text-gray-700 rounded-xl border border-gray-200/50">
+              <Shield className="w-5 h-5" />
+            </div>
+            <div>
+              <h2 className="text-base font-semibold text-gray-900">{t.securityTitle}</h2>
+              <p className="text-sm text-gray-500 mt-0.5">{t.securityDesc}</p>
+            </div>
+          </div>
+        </div>
+
+        <div className="p-8">
+          <form onSubmit={handleSecuritySubmit} className="space-y-6">
+            <div className="max-w-xl space-y-6">
+              
+              <div className="space-y-2.5">
+                <label className="text-sm font-semibold text-gray-700" htmlFor="currentPassword">Password Attuale</label>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                    <KeyRound className="h-4 w-4 text-gray-400" />
+                  </div>
+                  <input 
+                    type="password" 
+                    id="currentPassword"
+                    name="currentPassword"
+                    className="w-full pl-11 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:bg-white focus:ring-2 focus:ring-gray-200 focus:border-gray-900 transition-all outline-none"
+                    placeholder="••••••••"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 pt-2">
+                <div className="space-y-2.5">
+                  <label className="text-sm font-semibold text-gray-700" htmlFor="newPassword">Nuova Password</label>
+                  <input 
+                    type="password" 
+                    id="newPassword"
+                    name="newPassword"
+                    className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:bg-white focus:ring-2 focus:ring-gray-200 focus:border-gray-900 transition-all outline-none"
+                    placeholder="Nuova password"
+                  />
+                </div>
+
+                <div className="space-y-2.5">
+                  <label className="text-sm font-semibold text-gray-700" htmlFor="confirmPassword">Conferma Password</label>
+                  <input 
+                    type="password" 
+                    id="confirmPassword"
+                    name="confirmPassword"
+                    className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:bg-white focus:ring-2 focus:ring-gray-200 focus:border-gray-900 transition-all outline-none"
+                    placeholder="Ripeti la password"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div className="flex justify-end pt-6 border-t border-gray-100 mt-8">
+              <button 
+                type="submit"
+                disabled={isSavingSecurity}
+                className="flex items-center gap-2 bg-gray-900 text-white px-6 py-2.5 rounded-xl text-sm font-semibold hover:bg-gray-800 transition-all shadow-sm active:scale-[0.98] disabled:opacity-70 disabled:pointer-events-none"
+              >
+                {isSavingSecurity ? <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <Save className="w-4 h-4" />}
+                {isSavingSecurity ? t.savingBtn : "Aggiorna Password"}
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+      
     </div>
   )
 }

@@ -24,10 +24,10 @@ const dictionaries = {
   ru
 }
 
-export type Dictionary = typeof it;
+export type Dictionary = typeof en;
 
 export type Locale = keyof typeof dictionaries
-export const defaultLocale: Locale = 'it'
+export const defaultLocale: Locale = 'en'
 
 export async function getLocale(): Promise<Locale> {
   const cookieStore = await cookies()
@@ -48,9 +48,9 @@ export async function getLocale(): Promise<Locale> {
   return defaultLocale
 }
 
-export async function getDictionary() {
+export async function getDictionary(): Promise<Dictionary> {
   const locale = await getLocale()
-  return dictionaries[locale]
+  return dictionaries[locale] as unknown as Dictionary
 }
 
 export const dictionary = en;

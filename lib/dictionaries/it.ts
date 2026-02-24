@@ -1,8 +1,14 @@
 export const it = {
   metadata: {
     titleTemplate: '%s | Histyon',
-    defaultTitle: 'Home | Histyon',
-    description: "Diagnostica Medica Avanzata",
+    defaultTitle: 'Histyon - Diagnostica Medica Avanzata',
+    description: "Piattaforma cloud-native per gestione, archiviazione e analisi AI di vetrini digitali (WSI). Infrastruttura web scalabile e sicura per l'istopatologia.",
+    keywords: "istopatologia, WSI, patologia digitale, diagnostica medica, AI patologia, cloud sanitario",
+    openGraph: {
+      title: "Histyon - Diagnostica Medica Avanzata",
+      description: "Piattaforma cloud-native per la gestione di vetrini digitali (WSI) e analisi AI.",
+      siteName: "Histyon"
+    },
     loginTitle: "Accedi",
     registerTitle: "Registrati"
   },
